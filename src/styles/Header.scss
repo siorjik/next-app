@@ -1,0 +1,28 @@
+header {
+  height: 50px !important;
+  line-height: 50px !important;
+  display: flex;
+  background: yellowgreen !important;
+
+  .top-nav {
+    width: 90%;
+
+    a {
+      margin-right: 10px;
+      font-size: 17px;
+      color: brown;
+      font-weight: bold;
+
+      &.active {
+        text-shadow: 0 0 5px brown;
+      }
+    }
+  }
+
+  .btns-block {
+    width: 10%;
+    display: flex;
+    align-items: center;
+    font-size: 23px;
+  }
+}

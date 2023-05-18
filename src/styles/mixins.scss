@@ -1,0 +1,77 @@
+// width, height, margin, padding
+@for $i from 1 through 500 {
+  .h-#{$i}-vh {
+    height: $i + vh !important;
+  }
+
+  .h-#{$i}-percent {
+    height: $i * 1% !important;
+  }
+
+  .w-#{$i}-percent {
+    width: $i * 1% !important;
+  }
+
+  .w-#{$i} {
+    width: $i + px !important;
+  }
+
+  .max-w-#{$i} {
+    max-width: $i + px !important;
+  }
+
+  .mt-#{$i} {
+    margin-top: $i + px !important;
+  }
+
+  .mb-#{$i} {
+    margin-bottom: $i + px !important;
+  }
+
+  .mr-#{$i} {
+    margin-right: $i + px !important;
+  }
+
+  .ml-#{$i} {
+    margin-left: $i + px !important;
+  }
+
+  .p-#{$i} {
+    padding: $i + px !important;
+  }
+
+  .pb-#{$i} {
+    padding-bottom: $i + px !important;
+  }
+
+  .pt-#{$i} {
+    padding-top: $i + px !important;
+  }
+
+  .fs-#{$i} {
+    font-size: $i + px !important;
+  }
+}
+
+// flex
+.flex {
+  display: flex;
+}
+
+$j-contents: center, end, space-between, space-around;
+@each $j-content in $j-contents {
+  .j-content-#{$j-content} {
+    justify-content: $j-content;
+  }
+}
+
+$items: center, end;
+@each $a-items in $items {
+  .a-items-#{$a-items} {
+    align-items: $a-items;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}

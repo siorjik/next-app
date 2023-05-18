@@ -1,0 +1,55 @@
+aside {
+  width: 15%;
+  height: calc(100vh - 120px);
+  padding: 20px;
+  background: #000c17;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 1s;
+
+  &.shrink {
+    width: 55px;
+  }
+
+  a {
+    margin-bottom: 15px;
+    display: block;
+    color: beige;
+    white-space: nowrap;
+
+    &.active {
+      color: goldenrod;
+    }
+  }
+
+  .icons {
+    margin-right: 20px;
+    vertical-align: top;
+  }
+}
+
+main {
+  width: 85%;
+  height: calc(100vh - 120px);
+  padding: 10px;
+  overflow: auto;
+  transition: width 1s;
+
+  &.shrink {
+    width: calc(100% - 55px);
+  }
+}
+
+footer {
+  height: 70px;
+  background: brown !important;
+}
+
+.error {
+  color: red;
+}
+
+.icons {
+  color: gray;
+  font-size: 17px;
+}
