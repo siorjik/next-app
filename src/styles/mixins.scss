@@ -58,6 +58,12 @@
   display: flex;
 }
 
+.flex-direction {
+  &-column {
+    flex-direction: column;
+  }
+}
+
 $j-contents: center, end, space-between, space-around;
 @each $j-content in $j-contents {
   .j-content-#{$j-content} {
