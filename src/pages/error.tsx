@@ -4,23 +4,24 @@ import { useRouter } from 'next/router'
 import { signOut } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 
+import { loginAppPath } from '@/utils/paths'
+
 const Err = ({ isSignOut }: { isSignOut: boolean }) => {
   const { asPath } = useRouter()
 
+  const isLogOut = asPath.includes('signOut=true') || isSignOut
+
   useEffect(() => {
-    if (asPath.includes('signOut=true') || isSignOut) {
-
-      setTimeout(() => signOut(), 0)
-
-      window.location.href = '/login'
+    if (isLogOut) {
+      setTimeout(() => signOut({ redirect: true, callbackUrl: loginAppPath }), 3000)
     }
   }, [isSignOut])
 
   return (
-    <>
-      <h2>Error!</h2>
-      <Link href="/">Go to home</Link>
-    </>
+    <div className='h-100-vh flex flex-direction-column j-content-center a-items-center'>
+      <h2 className='error'>Error!</h2>
+      {isLogOut ? <p>Your session was expired, redirecting to Login page...</p> : <Link href="/">Go to home</Link>}
+    </div>
   )
 }
 

@@ -9,7 +9,7 @@ const Error = ({ error, className = '' }: { error: ApiErrorType, className?: str
   const { statusCode, message: errMess } = error
   const { replace, pathname } = useRouter()
 
-  if (statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true')
+  if (statusCode && statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true')
 
   return (
     <>

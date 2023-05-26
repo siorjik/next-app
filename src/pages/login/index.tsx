@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
 import { Button, Form, Input } from 'antd'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { signIn, useSession } from 'next-auth/react'
 
 import Error from '@/components/Error'
 import apiService from '@/services/apiService'
+import { userCreatingAppPath } from '@/utils/paths'
 
 const { Item } = Form
 
@@ -25,7 +27,7 @@ const Login = () => {
   }
 
   return (
-    <div className='login'>
+    <div className='primary-form'>
       <h2>Login</h2>
 
       <Form
@@ -46,6 +48,8 @@ const Login = () => {
       </Form>
 
       {data?.user?.error?.length ? <Error error={data.user} /> : null}
+
+      <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
     </div>
   )
 }
