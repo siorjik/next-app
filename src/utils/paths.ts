@@ -8,13 +8,6 @@ export const userCreateAppPath = `${usersAppPath}/create`
 export const getUserAppPath = (id: number) => `${usersAppPath}/${id}`
 export const getUserUpdateAppPath = (id: number | string) => `${usersAppPath}/${id}/update`
 
-/*-----------------local api paths---------------------------*/
-// user
-export const localApiUserCreatePath = '/api/user/create'
-export const localApiUserCreatePasswordPath = '/api/user/create-password'
-export const getLocalApiUserUpdatePath = (id: string) => `/api/user/${id}/update`
-export const getLocalApiUserDeletePath = (id: number) => `/api/user/${id}/delete`
-
 /*-----------------api paths-----------------*/
 // auth
 export const apiLoginPath = '/auth/login'

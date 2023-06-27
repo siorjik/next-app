@@ -1,114 +1,84 @@
 import axios from 'axios'
+import { getSession } from 'next-auth/react'
+import Router from 'next/router'
 
-import { apiRefreshPath } from '@/utils/paths'
+import { apiLogoutPath, apiRefreshPath } from '@/utils/paths'
+import { GetServerSidePropsContext } from 'next'
+import { TokensType } from '@/types/tokenType'
 
-class ApiService {
-  private axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST })
-  private accessToken = ''
-  private refreshCookie = ''
-
-  constructor() {
-    this.axiosInstance.interceptors.request.use(config => {
-      if (this.accessToken && (config.headers.Authorization !== this.accessToken || !config.headers.Authorization)) {
-        config.headers.Authorization = this.accessToken
-      }
-
-      if (this.refreshCookie && config.headers['Set-Cookie'] !== this.refreshCookie) {
-        config.headers['Set-Cookie'] = this.refreshCookie
-      }
-    
-      return config
-    })
-    
-    this.axiosInstance.interceptors.response.use(config => {
-      return config
-    }, async (error) => {
-      const originalRequest = error.config
-    
-      if (error.response!.status == 401 && originalRequest && !originalRequest.isRetry) {
-        originalRequest.isRetry = true
-
-        try {
-          const tokens = await axios.get(`${process.env.API_HOST}${apiRefreshPath}`, { withCredentials: true })
-  
-          if (tokens && tokens.data) {
-            await this.setAuth(tokens.data.accessToken)
-            await this.setCookie(tokens.headers['set-cookie']![0])
-  
-            const res = await this.axiosInstance.request(originalRequest)
-
-            if (res) return res.data
-          }
-        } catch (err) {
-          throw err
-        }
-      } else if (error.response!.status == 400) {
-        throw error
-      }
-    })
-  }
-
-  async setAuth(token: string) {
-    this.accessToken = `Bearer ${token}`
-
-    //this.axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`
-  }
-
-  async setCookie(value: string) {
-    this.refreshCookie = value
-
-    //this.axiosInstance.defaults.headers.common['Set-Cookie'] = value
-    axios.defaults.headers.common['Set-Cookie'] = value
-  }
-
-  async get(url: string, withData: boolean = true) {
-    try {
-      if (withData) {
-        const res = await this.axiosInstance.get(url)
-
-        if (res) return res.data
-      } else return await this.axiosInstance.get(url)
-    } catch (err) {
-      throw err
-    }
-  }
-
-  async post(url: string, fields: { [k: string]: string | number | boolean }, withData: boolean = true) {
-    try {
-      if (withData) {
-        const res = await this.axiosInstance.post(url, fields)
-
-        if (res) return res.data
-      } else return await this.axiosInstance.post(url, fields)
-    } catch (err) {
-      throw err
-    }
-  }
-
-  async put(url: string, fields: { [k: string]: string | number | boolean }) {
-    try {
-      const res = await this.axiosInstance.put(url, fields)
-
-      if (res) return res.data
-    } catch (err) {
-      console.log('PUT error ', err.response.data)
-      throw err
-    }
-  }
-
-  async delete(url: string) {
-    try {
-      return (await this.axiosInstance.delete(url)).data
-    } catch (err) {
-      throw err
-    }
-  }
-
-  clearSettings() {
-    this.setAuth('')
-    this.setCookie('')
-  }
+type RequestMethodType = 'get' | 'post' | 'put' | 'delete'
+type ParamsType = {
+  url: string,
+  method: string,
+  name?: string,
+  ctx?: GetServerSidePropsContext,
+  data?: { [k: string]: string | number | boolean }
+  isServer?: boolean,
+  updateAuth?: (tokens: TokensType) => {}
+  isLogOut?: boolean,
 }
 
-export default new ApiService()
+const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`
+
+export default async (params: ParamsType) => {
+  let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false } = params
+
+  const session = await getSession(ctx)
+
+  const axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST || session?.apiUrl })
+
+  try {
+    axiosInstance.defaults.headers.common.Authorization = `Bearer ${session?.user.accessToken}`
+
+    const result = await axiosInstance[method as RequestMethodType](url, { ...data })
+
+    return isServer ? { props: { [name]: result.data } } : result.data
+  } catch (error) {
+    if (error.response!.status == 401) {
+      try {
+        const tokens = await axiosInstance.get(`${apiRefreshPath}?refresh=${session?.user.refreshToken}`)
+
+        if (tokens) {
+          axiosInstance.defaults.headers.common.Authorization = `Bearer ${tokens.data.accessToken}`
+
+          try {
+            if (isLogOut) url = getLogOutUrl(tokens.data.refreshToken)
+
+            const result = await axiosInstance[method as RequestMethodType](url, { ...data })
+  
+            if (isServer) return { props: { [name]: result.data, tokens: { ...tokens.data } } }
+            else {
+              updateAuth(tokens.data)
+  
+              return result.data
+            }
+          } catch (error) {
+            if (!isServer) updateAuth(tokens.data)
+
+            throw error
+          }
+        }
+      } catch (error) {
+        if (isServer) {
+          return {
+            redirect: {
+              destination: error.response.status === 401 ? '/error?signOut=true' : '/error',
+              permanent: false,
+            }
+          }
+        } else {
+          if (error.response.status === 401) return Router.push('/error?signOut=true')
+          else return error.response.data
+        }
+      }
+    } else {
+      if (!isServer) return error.response.data
+      else return {
+        redirect: {
+          destination: '/error',
+          permanent: false,
+        }
+      }
+    }
+  }
+}

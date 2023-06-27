@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { Button, Form, Input } from 'antd'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { signIn, useSession } from 'next-auth/react'
+import { getSession, signIn, useSession } from 'next-auth/react'
+import { GetServerSideProps } from 'next'
 
 import Error from '@/components/Error'
-import apiService from '@/services/apiService'
 import { userCreatingAppPath } from '@/utils/paths'
 
 const { Item } = Form
@@ -13,10 +13,6 @@ const { Item } = Form
 const Login = () => {
   const router = useRouter()
   const { data } = useSession()
-
-  useEffect(() => {
-    apiService.clearSettings()
-  }, [])
 
   useEffect(() => {
     if (data?.user.id) router.push('/')
@@ -42,7 +38,7 @@ const Login = () => {
           <Input type='email' />
         </Item>
         <Item name='password' label='Password' rules={[{ required: true, message: 'Please input your Password!' }]}>
-          <Input type='password' />
+          <Input.Password />
         </Item>
         <Item><Button type='primary' htmlType='submit'>Login</Button></Item>
       </Form>
@@ -52,6 +48,14 @@ const Login = () => {
       <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
     </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx)
+
+  if (session) return { redirect: { destination: '/', permanent: false } }
+
+  return { props: {} }
 }
 
 export default Login

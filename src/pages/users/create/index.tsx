@@ -3,16 +3,18 @@ import { useState } from "react"
 
 import apiService from "@/services/apiService"
 import Error from "@/components/Error"
-import { localApiUserCreatePath } from '@/utils/paths'
+import { apiUserCreatePath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
+import withAuth from '@/hoc/withAuth'
+import { TokensType } from '@/types/tokenType'
 
 const { Item } = Form
 
-const Creating = () => {
+const Creating = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
-    const result = await apiService.post(localApiUserCreatePath, values)
+    const result = await apiService({ url: apiUserCreatePath, data: values, method: 'post', isServer: false, updateAuth })
     
     if (result.error) setErr(result)
     else setErr({ message: '', statusCode: 0, error: '' })
@@ -44,4 +46,4 @@ const Creating = () => {
   )
 }
 
-export default Creating
+export default withAuth(Creating)
