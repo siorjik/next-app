@@ -5,7 +5,7 @@ import { useRouter } from "next/router"
 import { UserType } from "@/types/userType"
 import apiService from "@/services/apiService"
 import { getApiUserPath, getUserUpdateAppPath } from '@/utils/paths'
-import getServerSidePropsHelper from '@/helpers/getServerSidePropsHelper'
+import withAuth from '@/hoc/withAuth'
 
 const User = ({ user }: { user: UserType }) => {
   const { query } = useRouter()
@@ -22,7 +22,7 @@ const User = ({ user }: { user: UserType }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  return await getServerSidePropsHelper(async() => await apiService.get(getApiUserPath(ctx.params!.id as string)), 'user')
+  return await apiService({ url: getApiUserPath(ctx.params!.id as string), method: 'get', ctx, name: 'user' })
 }
 
-export default User
+export default withAuth(User)

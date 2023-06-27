@@ -3,16 +3,17 @@ import { useState } from "react"
 import { GetServerSideProps } from "next"
 import { useRouter } from "next/router"
 
-import apiService from "@/services/apiService"
 import Error from "@/components/Error"
 import { UserType } from "@/types/userType"
-import { getApiUserPath, getLocalApiUserUpdatePath } from '@/utils/paths'
-import getServerSidePropsHelper from '@/helpers/getServerSidePropsHelper'
+import { getApiUserPath, getApiUserUpdatePath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
+import apiService from '@/services/apiService'
+import withAuth from '@/hoc/withAuth'
+import { TokensType } from '@/types/tokenType'
 
 const { Item } = Form
 
-const Updating = ({ user }: { user: UserType }) => {
+const Updating = ({ user, updateAuth }: { user: UserType, updateAuth: (tokens: TokensType) => {} }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const { query } = useRouter()
@@ -22,7 +23,8 @@ const Updating = ({ user }: { user: UserType }) => {
 
     valuesCopy.isActive = !!values.isActive
 
-    const result = await apiService.put(getLocalApiUserUpdatePath(query.id as string), valuesCopy)
+    const result =
+      await apiService({ url: getApiUserUpdatePath(query.id as string), method: 'put', data: valuesCopy, isServer: false, updateAuth })
 
     if (result.error) setErr(result)
     else setErr({ message: '', statusCode: 0, error: '' })
@@ -63,7 +65,7 @@ const Updating = ({ user }: { user: UserType }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  return await getServerSidePropsHelper(async() => await apiService.get(getApiUserPath(ctx.params!.id as string)), 'user')
+  return await apiService({ url: getApiUserPath(ctx.params!.id as string), method: 'get', ctx, name: 'user' })
 }
 
-export default Updating
+export default withAuth(Updating)

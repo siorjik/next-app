@@ -6,14 +6,14 @@ import { GetServerSideProps } from 'next'
 
 import apiService from "@/services/apiService"
 import Error from "@/components/Error"
-import { localApiUserCreatePasswordPath, loginAppPath } from '@/utils/paths'
+import { apiUserCreatePasswordPath, loginAppPath, userCreatingAppPath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
 
 type ObjType = { [k: string]: string | number }
 
 const { Item } = Form
 
-const PasswordCreating = () => {
+const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const [messageApi, contextHolder] = message.useMessage()
@@ -30,10 +30,17 @@ const PasswordCreating = () => {
       return false
     }
 
-    const result = await apiService.post(localApiUserCreatePasswordPath, { password: pass, token: query.accessToken as string })
+    const result = await apiService({
+      url: `${apiUrl}${apiUserCreatePasswordPath}`,
+      data: { password: pass, token: query.accessToken as string },
+      method: 'post', isServer: false
+    })
     
-    if (result.error) setErr(result)
-    else {
+    if (result.error) {
+      setErr(result)
+
+      setTimeout(() => push(userCreatingAppPath), 3000)
+    } else {
       setErr({ message: '', statusCode: 0, error: '' })
 
       messageApi.success('Password was created. Redirecting to login page...')
@@ -77,7 +84,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  return { props: {} }
+  const apiUrl = process.env.API_HOST
+
+  return { props: { apiUrl } }
 }
 
 export default PasswordCreating

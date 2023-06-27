@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 import apiService from '@/services/apiService'
-import { apiLoginPath, apiLogoutPath } from '@/utils/paths'
+import { apiLoginPath } from '@/utils/paths'
 
 import type { NextApiRequest, NextApiResponse } from "next"
 
@@ -16,19 +16,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           password: { label: 'Password', type: 'password' },
         },
         async authorize(credentials) {
-          const user = await apiService.post(apiLoginPath, credentials!, false)
+          const result = await apiService({ url: apiLoginPath, data: credentials, method: 'post', name: 'sessionUser' })
 
-          if (user.data) {
-            if (!user.data.error) {
-              const cookie = user.headers['set-cookie'].find((item: string) => item.includes('refresh'))
-
-              res.setHeader('Set-Cookie', cookie)
-
-              apiService.setCookie(cookie)
-            }
-
-            return user.data
-          } else return null
+          if (result.props.sessionUser) return result.props.sessionUser
+          else return null
         }
       })
     ],
@@ -39,23 +30,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     callbacks: {
       jwt: async ({ token, user }) => {
-        return { ...token, ...user }
+        if (req.url?.includes('update')) {
+
+          token = { ...token, accessToken: req.query.access, refreshToken: req.query.refresh }
+        }
+
+        return { ...user, ...token }
       },
       session: async ({ session, token }) => {
         session.user = token
         session.apiUrl = process.env.API_HOST!
 
-        apiService.setAuth(session.user.token)
-
         return session
-      }
-    },
-
-    events: {
-      signOut: async () => {
-        await apiService.post(apiLogoutPath, {})
-        
-        apiService.clearSettings()
       }
     },
 

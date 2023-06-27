@@ -6,19 +6,19 @@ import { GetServerSideProps } from 'next'
 
 import apiService from "@/services/apiService"
 import Error from "@/components/Error"
-import { localApiUserCreatePath, loginAppPath } from '@/utils/paths'
+import { apiUserCreatePath, loginAppPath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
 
 const { Item } = Form
 
-const UserCreating = () => {
+const UserCreating = ({ apiUrl }: { apiUrl: string }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
   const [isShowAlert, setShowAlert] = useState(false)
 
   const [form] = Form.useForm()
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
-    const result = await apiService.post(localApiUserCreatePath, values)
+    const result = await apiService({ url: `${apiUrl}${apiUserCreatePath}`, data: values, method: 'post', isServer: false })
     
     if (result.error) setErr(result)
     else {
@@ -64,7 +64,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  return { props: {} }
+  const apiUrl = process.env.API_HOST
+
+  return { props: { apiUrl } }
 }
 
 export default UserCreating
