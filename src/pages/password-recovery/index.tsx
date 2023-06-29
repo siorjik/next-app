@@ -6,14 +6,14 @@ import { GetServerSideProps } from 'next'
 
 import apiService from "@/services/apiService"
 import Error from "@/components/Error"
-import { apiUserCreatePasswordPath, loginAppPath, userCreatingAppPath } from '@/utils/paths'
+import { apiUserRecoverPasswordPath, loginAppPath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
 
 type ObjType = { [k: string]: string | number }
 
 const { Item } = Form
 
-const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
+const PasswordRecovery = ({ apiUrl }: { apiUrl: string }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const [messageApi, contextHolder] = message.useMessage()
@@ -31,29 +31,27 @@ const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
     }
 
     const result = await apiService({
-      url: `${apiUrl}${apiUserCreatePasswordPath}`,
-      data: { password: pass, token: query.accessToken as string },
+      url: `${apiUrl}${apiUserRecoverPasswordPath}`,
+      data: { email: query.email as string, password: pass, token: query.accessToken as string },
       method: 'post',
       isServer: false,
     })
-    
+
     if (result.error) {
       setErr(result)
-
-      setTimeout(() => push(userCreatingAppPath), 3000)
     } else {
       setErr({ message: '', statusCode: 0, error: '' })
 
-      messageApi.success('Password was created. Redirecting to login page...')
+      messageApi.success('Password was changed. Redirecting to login page...')
       form.resetFields()
-
-      setTimeout(() => push(loginAppPath), 3000)
     }
+
+    setTimeout(() => push(loginAppPath), 3000)
   }
 
   return (
     <div className='primary-form'>
-      <h2>Password creating</h2>
+      <h2>Password recovery</h2>
 
       <Form form={form} layout='vertical' onFinish={onSubmit}>
         <Item
@@ -70,7 +68,7 @@ const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
         >
           <Input.Password />
         </Item>
-        <Item><Button type='primary' htmlType='submit'>Create Password</Button></Item>
+        <Item><Button type='primary' htmlType='submit'>Change Password</Button></Item>
       </Form>
 
       {err.message ? <Error error={err} className='w-50-percent' /> : null}
@@ -90,4 +88,4 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return { props: { apiUrl } }
 }
 
-export default PasswordCreating
+export default PasswordRecovery
