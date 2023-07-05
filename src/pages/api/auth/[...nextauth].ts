@@ -16,10 +16,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           password: { label: 'Password', type: 'password' },
         },
         async authorize(credentials) {
-          const result = await apiService({ url: apiLoginPath, data: credentials, method: 'post', name: 'sessionUser' })
+          const result = await apiService({ url: apiLoginPath, data: credentials, method: 'post', name: 'sessionUser', isLogIn: true })
 
-          if (result.props.sessionUser) return result.props.sessionUser
-          else return null
+          if (result.props && result.props.sessionUser) return result.props.sessionUser
+          else throw new Error(result)
         }
       })
     ],
