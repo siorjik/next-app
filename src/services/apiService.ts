@@ -16,12 +16,13 @@ type ParamsType = {
   isServer?: boolean,
   updateAuth?: (tokens: TokensType) => {}
   isLogOut?: boolean,
+  isLogIn?: boolean,
 }
 
 const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`
 
 export default async (params: ParamsType) => {
-  let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false } = params
+  let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false } = params
 
   const session = await getSession(ctx)
 
@@ -34,7 +35,7 @@ export default async (params: ParamsType) => {
 
     return isServer ? { props: { [name]: result.data } } : result.data
   } catch (error) {
-    if (error.response!.status == 401) {
+    if (error.response!.status == 401 && !isLogIn) {
       try {
         const tokens = await axiosInstance.get(`${apiRefreshPath}?refresh=${session?.user.refreshToken}`)
 
@@ -45,11 +46,11 @@ export default async (params: ParamsType) => {
             if (isLogOut) url = getLogOutUrl(tokens.data.refreshToken)
 
             const result = await axiosInstance[method as RequestMethodType](url, { ...data })
-  
+
             if (isServer) return { props: { [name]: result.data, tokens: { ...tokens.data } } }
             else {
               updateAuth(tokens.data)
-  
+
               return result.data
             }
           } catch (error) {
@@ -73,10 +74,14 @@ export default async (params: ParamsType) => {
       }
     } else {
       if (!isServer) return error.response.data
-      else return {
-        redirect: {
-          destination: '/error',
-          permanent: false,
+      else {
+        if (isLogIn) return error.response.data
+        
+        return {
+          redirect: {
+            destination: '/error',
+            permanent: false,
+          }
         }
       }
     }

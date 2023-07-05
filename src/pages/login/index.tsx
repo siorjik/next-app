@@ -8,11 +8,13 @@ import { GetServerSideProps } from 'next'
 import Error from '@/components/Error'
 import { apiUserRecoverPasswordPath, userCreatingAppPath } from '@/utils/paths'
 import apiService from '@/services/apiService'
+import { ApiErrorType } from '@/types/errorType'
 
 const { Item } = Form
 
 const Login = ({ apiUrl }: { apiUrl: string }) => {
   const [modal, setModal] = useState<{ text: string | ReactElement, isShow: boolean }>({ text: '', isShow: false })
+  const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const router = useRouter()
   const { data } = useSession()
@@ -24,7 +26,9 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
   }, [data, router])
 
   const onSubmit = async (values: { email: string, password: string }) => {
-    await signIn('credentials', { redirect: false, ...values })
+    const res = await signIn('credentials', { redirect: false, ...values })
+
+    if (res?.error) setErr({ message: res.error })
   }
 
   const handleOk = async () => {
@@ -69,7 +73,7 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
         <Item><Button type='primary' htmlType='submit'>Login</Button></Item>
       </Form>
 
-      {data?.user?.error?.length ? <Error error={data.user} /> : null}
+      {err.message ? <Error error={err} /> : null}
 
       <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
       <p className='mt-20 pointer' onClick={() => setModal({ ...modal, isShow: true })}>Forgot your password?</p>
