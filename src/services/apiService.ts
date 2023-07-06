@@ -19,33 +19,37 @@ type ParamsType = {
   isLogIn?: boolean,
 }
 
-const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`
-
 export default async (params: ParamsType) => {
   let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false } = params
-
+  
   const session = await getSession(ctx)
-
+  
   const axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST || session?.apiUrl })
+  
+  const setAuthHeader = (token: string) => axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`
+  const getRequest = async () => axiosInstance[method as RequestMethodType](url, { ...data })
+  const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`
 
   try {
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${session?.user.accessToken}`
+    setAuthHeader(session?.user.accessToken)
 
-    const result = await axiosInstance[method as RequestMethodType](url, { ...data })
+    const result = await getRequest()
 
     return isServer ? { props: { [name]: result.data } } : result.data
   } catch (error) {
-    if (error.response!.status == 401 && !isLogIn) {
+    if (error.response!.status == 401) {
+      if (isLogIn) return error.response.data
+
       try {
         const tokens = await axiosInstance.get(`${apiRefreshPath}?refresh=${session?.user.refreshToken}`)
 
         if (tokens) {
-          axiosInstance.defaults.headers.common.Authorization = `Bearer ${tokens.data.accessToken}`
+          setAuthHeader(tokens.data.accessToken)
 
           try {
             if (isLogOut) url = getLogOutUrl(tokens.data.refreshToken)
 
-            const result = await axiosInstance[method as RequestMethodType](url, { ...data })
+            const result = await getRequest()
 
             if (isServer) return { props: { [name]: result.data, tokens: { ...tokens.data } } }
             else {
@@ -74,14 +78,11 @@ export default async (params: ParamsType) => {
       }
     } else {
       if (!isServer) return error.response.data
-      else {
-        if (isLogIn) return error.response.data
-        
-        return {
-          redirect: {
-            destination: '/error',
-            permanent: false,
-          }
+
+      return {
+        redirect: {
+          destination: '/error',
+          permanent: false,
         }
       }
     }
