@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GetServerSideProps } from "next"
 import Link from "next/link"
 import { useRouter } from 'next/router'
@@ -10,11 +10,34 @@ import apiService from "@/services/apiService"
 import { apiUsersPath, getApiUserDeletePath, getUserAppPath, getUserUpdateAppPath } from '@/utils/paths'
 import withAuth from '@/hoc/withAuth'
 import { TokensType } from '@/types/tokenType'
+import getSocket from '@/services/socket'
 
 const User = ({ users, updateAuth }: { users: UserType[], updateAuth: (tokens: TokensType) => {} }) => {
   const [userList, setUserList] = useState<UserType[]>(users)
 
   const router = useRouter()
+
+  useEffect(() => {
+    (async () => {
+      const socket = await getSocket()
+
+      socket.on('userListUpdating', ({ deletedUsersEmails }: { deletedUsersEmails: string[] }) => {
+        updateUserList(deletedUsersEmails)
+      })
+    })()
+  }, [])
+
+  const updateUserList = (deletedUsersEmails: string[]) => {
+    let list: UserType[] = []
+
+    if (deletedUsersEmails.length) {
+      userList.forEach((user: UserType) => {
+        if (!deletedUsersEmails.find((email: string) => email === user.email) && !list.find((item: UserType) => item.id === user.id)) list.push(user)
+      })
+    } else list = userList
+
+    setUserList(list)
+  }
 
   const remove = async (id: number) => {
     const result = await apiService({ url: getApiUserDeletePath(id), method: 'delete', isServer: false, updateAuth })
