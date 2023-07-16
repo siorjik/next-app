@@ -18,7 +18,7 @@ const UserCreating = ({ apiUrl }: { apiUrl: string }) => {
   const [form] = Form.useForm()
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
-    const result = await apiService({ url: `${apiUrl}${apiUserCreatePath}`, data: values, method: 'post', isServer: false })
+    const result = await apiService({ url: `${apiUrl}${apiUserCreatePath}`, data: { ...values, isActive: false }, method: 'post', isServer: false })
     
     if (result.error) setErr(result)
     else {
