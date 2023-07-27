@@ -1,10 +1,12 @@
 import axios from 'axios'
 import { getSession } from 'next-auth/react'
+import { getToken } from 'next-auth/jwt'
 import Router from 'next/router'
 
 import { apiLogoutPath, apiRefreshPath } from '@/utils/paths'
-import { GetServerSidePropsContext } from 'next'
+import { GetServerSidePropsContext, NextApiRequest } from 'next'
 import { TokensType } from '@/types/tokenType'
+import { UserType } from '@/types/userType'
 
 type RequestMethodType = 'get' | 'post' | 'put' | 'delete'
 type ParamsType = {
@@ -18,14 +20,24 @@ type ParamsType = {
   isLogOut?: boolean,
   isLogIn?: boolean,
 }
+type sessionUserType = {
+  accessToken: '',
+  refreshToken: '',
+  apiUrl: '',
+  webUrl: '',
+}
 
 export default async (params: ParamsType) => {
   let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false } = params
-  
-  const session = await getSession(ctx)
-  
-  const axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST || session?.apiUrl })
-  
+  let session = { user: { accessToken: '', refreshToken: '', apiUrl: '', webUrl: '' } }
+
+  if (!isLogIn) {
+    if (!isServer) session = { ...session, ...await getSession() }
+    else session = { ...session, user: { ...await getToken({ req: ctx?.req as NextApiRequest }) } as sessionUserType & UserType }
+  }
+
+  const axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST || (session?.user.webUrl || session?.user.apiUrl) })
+
   const setAuthHeader = (token: string) => axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`
   const getRequest = async () => axiosInstance[method as RequestMethodType](url, { ...data })
   const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`

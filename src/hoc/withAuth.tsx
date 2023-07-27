@@ -2,7 +2,7 @@ import { TokensType } from '@/types/tokenType'
 import { useEffect } from 'react'
 
 function withAuth<P>(WrappedComponent: React.ComponentType<P>) {
-  const Component = (props: P & { tokens: TokensType }) => {
+  const Component = (props: P & { tokens?: TokensType }) => {
     const { tokens } = props
 
     useEffect(() => {

@@ -4,5 +4,6 @@ export type UserType = {
   lastName: string,
   email: string,
   isActive: boolean,
-  token: string,
+  createdAt: string,
+  updatedAt: string,
 }

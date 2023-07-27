@@ -35,11 +35,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           token = { ...token, accessToken: req.query.access, refreshToken: req.query.refresh }
         }
 
-        return { ...user, ...token }
+        return { ...user, ...token, apiUrl: process.env.API_HOST!, webUrl: process.env.WEB_HOST }
       },
       session: async ({ session, token }) => {
         session.user = token
-        session.apiUrl = process.env.API_HOST!
 
         return session
       }
