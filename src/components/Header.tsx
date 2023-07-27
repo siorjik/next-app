@@ -1,17 +1,16 @@
 import { Layout } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { getSession, signOut } from 'next-auth/react'
 
 import { apiLogoutPath, usersAppPath } from '@/utils/paths'
-import { getSession, signOut } from 'next-auth/react'
 import { LogoutOutlined } from '@ant-design/icons'
 import apiService from '@/services/apiService'
-import withAuth from '@/hoc/withAuth'
 import { TokensType } from '@/types/tokenType'
 
 const { Header } = Layout
 
-const HeaderComp = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => {
+const HeaderComp = ({ updateAuth }: { updateAuth?: (tokens: TokensType) => {} }) => {
   const { pathname } = useRouter()
 
   const menuData = [
@@ -46,4 +45,4 @@ const HeaderComp = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) 
   )
 }
 
-export default withAuth(HeaderComp)
+export default HeaderComp

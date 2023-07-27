@@ -1,0 +1,39 @@
+version: '3'
+
+networks:
+  next-nest-app:
+    name: next-nest-app
+    driver: bridge
+    external: true
+
+services:
+  web:
+    build: ./
+    image: web
+    container_name: web
+    expose:
+      - '3000'
+    env_file:
+      - .env.production
+    networks:
+      - next-nest-app
+    # restart: always
+    # volumes:
+    #   - ./:/app
+    #   - /app/node_modules
+    #   - /app/.next
+    # extra_hosts:
+    #   - 'host.docker.internal:host-gateway'
+
+  nginx:
+    image: nginx-proxy
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - '3000:80'
+    # restart: always
+    depends_on:
+      - web
+    networks:
+      - next-nest-app
+  

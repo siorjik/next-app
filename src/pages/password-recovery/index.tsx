@@ -83,7 +83,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  const apiUrl = process.env.API_HOST
+  const apiUrl = process.env.APP_ENV === 'development' ? process.env.API_HOST : process.env.WEB_HOST
 
   return { props: { apiUrl } }
 }

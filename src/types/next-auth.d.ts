@@ -3,7 +3,6 @@ import { JWT } from 'next-auth/jwt'
 
 declare module "next-auth" {
   interface Session {
-    apiUrl: string,
     user: {
       id: number,
       email: string,
@@ -13,6 +12,8 @@ declare module "next-auth" {
       firstName: string,
       lastName: string,
       error?: [string] | string,
+      apiUrl: string,
+      webUrl: string,
     } & typeof JWT
   }
 }
