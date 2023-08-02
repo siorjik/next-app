@@ -8,7 +8,7 @@ import { GetServerSidePropsContext, NextApiRequest } from 'next'
 import { TokensType } from '@/types/tokenType'
 import { UserType } from '@/types/userType'
 
-type RequestMethodType = 'get' | 'post' | 'put' | 'delete'
+type RequestMethodType = 'get' | 'post' | 'put' | 'delete' | 'patch'
 type ParamsType = {
   url: string,
   method: string,

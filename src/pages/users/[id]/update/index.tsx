@@ -59,7 +59,7 @@ const Updating = ({ user, updateAuth }: { user: UserType, updateAuth: (tokens: T
         <Item><Button type='primary' htmlType='submit'>Update</Button></Item>
       </Form>
 
-      {err.error ? <Error error={err} className='w-50-percent' /> : null}
+      {err.error ? <Error error={err} /> : null}
     </>
   )
 }
