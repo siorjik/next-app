@@ -2,6 +2,7 @@ export const loginAppPath = '/login'
 export const userCreatingAppPath = '/user-creating'
 export const passwordCreatingAppPath = '/password-creating'
 export const passwordRecoverAppPath = '/password-recovery'
+export const profileAppPath = '/profile'
 
 // user
 export const usersAppPath = '/users'
@@ -23,3 +24,4 @@ export const apiUserRecoverPasswordPath = '/user/recover-password'
 export const getApiUserPath = (id: string) => `${apiUsersPath}/${id}`
 export const getApiUserUpdatePath = (id: string) => `/user/${id}/update`
 export const getApiUserDeletePath = (id: number) => `/user/${id}/delete`
+export const getApiUserUpdatePasswordPath = (id: number | string) => `/user/${id}/update-password`

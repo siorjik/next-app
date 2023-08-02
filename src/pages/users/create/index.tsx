@@ -41,7 +41,7 @@ const Creating = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) =>
         <Item><Button type='primary' htmlType='submit'>Create</Button></Item>
       </Form>
 
-      {err.error ? <Error error={err} className='w-50-percent' /> : null}
+      {err.error ? <Error error={err} /> : null}
     </>
   )
 }

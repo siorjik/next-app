@@ -6,7 +6,8 @@ import 'antd/dist/reset.css'
 import '@/styles/index.scss'
 
 import Layout from '@/components/Layout'
-import { loginAppPath, passwordCreatingAppPath, passwordRecoverAppPath, userCreatingAppPath } from '@/utils/paths'
+import { loginAppPath, passwordCreatingAppPath, passwordRecoverAppPath, profileAppPath, userCreatingAppPath } from '@/utils/paths'
+import LayoutWithoutSidebar from '@/components/Layout/LayoutWithoutSidebar'
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const { pathname } = useRouter()
@@ -20,6 +21,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     pathname === passwordRecoverAppPath
   ) {
     return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
+  } else if (pathname === profileAppPath) {
+    return <SessionProvider session={session}><LayoutWithoutSidebar><Component { ...pageProps } /></LayoutWithoutSidebar></SessionProvider>
   }
 
   return <SessionProvider session={session}><Layout><Component {...pageProps} /></Layout></SessionProvider>

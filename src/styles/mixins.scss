@@ -48,9 +48,17 @@
     padding-top: $i + px !important;
   }
 
+  .pl-#{$i} {
+    padding-left: $i + px !important;
+  }
+
   .fs-#{$i} {
     font-size: $i + px !important;
   }
+}
+
+.m-auto {
+  margin: 0 auto;
 }
 
 // flex

@@ -71,7 +71,7 @@ const PasswordRecovery = ({ apiUrl }: { apiUrl: string }) => {
         <Item><Button type='primary' htmlType='submit'>Change Password</Button></Item>
       </Form>
 
-      {err.message ? <Error error={err} className='w-50-percent' /> : null}
+      {err.message ? <Error error={err} /> : null}
 
       {contextHolder}
     </div>

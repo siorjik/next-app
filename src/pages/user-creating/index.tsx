@@ -50,7 +50,7 @@ const UserCreating = ({ apiUrl }: { apiUrl: string }) => {
         <Item><Button type='primary' htmlType='submit'>Create</Button></Item>
       </Form>
 
-      {err.error ? <Error error={err} className='w-50-percent' /> : null}
+      {err.error ? <Error error={err} /> : null}
 
       {isShowAlert && <Alert message='Account was created. Check your mail to continue...' type="success" showIcon />}
 

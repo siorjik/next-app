@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Alert } from "antd"
+import { Alert, Row, Col } from "antd"
 import { useRouter } from 'next/router'
 
 import { loginAppPath } from '@/utils/paths'
@@ -12,14 +12,16 @@ const Error = ({ error, className = '' }: { error: ApiErrorType, className?: str
   if (statusCode && statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true')
 
   return (
-    <>
-      {
-        errMess.length && Array.isArray(errMess) ?
-          errMess.map((item, index) =>
-            <Fragment key={index}><Alert className={`error ${className}`} type='error' message={item} banner closable /></Fragment>) :
-          typeof errMess === 'string' ? <Alert className={`error ${className}`} type='error' message={errMess} banner closable /> : null
-      }
-    </>
+    <Row>
+      <Col xs={24} md={16} lg={12}>
+        {
+          errMess.length && Array.isArray(errMess) ?
+            errMess.map((item, index) =>
+              <Fragment key={index}><Alert className={`error ${className}`} type='error' message={item} banner closable /></Fragment>) :
+            typeof errMess === 'string' ? <Alert className={`error ${className}`} type='error' message={errMess} banner closable /> : null
+        }
+      </Col>
+    </Row>
   )
 }
 
