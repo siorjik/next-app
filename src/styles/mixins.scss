@@ -8,6 +8,10 @@
     height: $i * 1% !important;
   }
 
+  .h-#{$i} {
+    height: $i + px !important;
+  }
+
   .w-#{$i}-percent {
     width: $i * 1% !important;
   }

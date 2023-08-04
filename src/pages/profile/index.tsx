@@ -1,25 +1,24 @@
 import { useState, useEffect } from 'react'
-import { Button, Form, Input, Tabs, Row, Col, Alert } from 'antd'
+import { Form, Tabs, Alert } from 'antd'
 import type { TabsProps } from 'antd'
 import { getSession } from 'next-auth/react'
 
 import Error from '@/components/Error'
+import TwoFa from './TwoFa'
+import PasswordForm from './PasswordForm'
+import Settings from './Settings'
 
 import { ApiErrorType } from '@/types/errorType'
 import apiService from '@/services/apiService'
-import { getApiUserPath, getApiUserUpdatePasswordPath, getApiUserUpdatePath } from '@/utils/paths'
+import { apiTwoFaConfirmPath, getApiTwoFaPath, getApiUserPath, getApiUserUpdatePasswordPath, getApiUserUpdatePath } from '@/utils/paths'
 import { TokensType } from '@/types/tokenType'
-import { UserType } from '@/types/userType'
+import { ProfileUserType, UserType } from '@/types/userType'
 import withAuth from '@/hoc/withAuth'
-
-const { Item } = Form
-
-type UserStateType = { firstName: string, lastName: string, email: string, id: string }
 
 const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
-  const [user, setUser] = useState<UserStateType>({ firstName: '', lastName: '', email: '', id: '' })
-  const [isShowModal, setShowModal] = useState(false)
+  const [user, setUser] = useState<ProfileUserType>({ firstName: '', lastName: '', email: '', id: '', isTwoFa: false })
+  const [modal, setModal] = useState<{ isShow: boolean, text:string }>({ isShow: false, text: '' })
 
   const [form] = Form.useForm()
 
@@ -27,18 +26,21 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
     (async () => {
       const session = await getSession()
 
-      const userData: UserType = await apiService({ url: getApiUserPath(session?.user.id), method: 'get', isServer: false, updateAuth })
-
-      setUser({ ...user, firstName: userData.firstName, lastName: userData.lastName, email: userData.email, id: String(userData.id) })
+      const user: UserType = await apiService({ url: getApiUserPath(session?.user.id), method: 'get', isServer: false, updateAuth })
+      
+      setStateUser(user)
     })()
   }, [])
 
   useEffect(() => {
-    if (isShowModal) setTimeout(() => setShowModal(false), 3000)
-  }, [isShowModal])
+    if (modal.isShow) setTimeout(() => setModal({ isShow: false, text: '' }), 3000)
+    if (err.message) setTimeout(() => clearErrState(), 3000)
+  }, [modal.isShow, err.message])
 
-  const onChange = () => {
-    if (isShowModal) setShowModal(false)
+  const setStateUser = (user: UserType) => {
+    const { firstName, lastName, email, id: userId, isTwoFa } = user
+
+    setUser({ ...user, firstName, lastName, email, id: String(userId), isTwoFa })
   }
 
   const clearErrState = () => {
@@ -57,7 +59,7 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
     if (result.error) setErr(result)
     else {
       clearErrState()
-      setShowModal(true)
+      setModal({ isShow: true, text: 'Data was updated...' })
     }
   }
 
@@ -81,89 +83,76 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
     if (result.error) setErr(result)
     else {
       clearErrState()
-      setShowModal(true)
+      setModal({ isShow: true, text: 'Data was updated...' })
 
       form.resetFields()
     }
   }
 
-  const settingsForm = (
-    <Row>
-      <Col xs={24} md={16} lg={12}>
-        <Form layout='vertical' initialValues={{ ...user }} onFinish={onSubmit}>
-          <Item name='firstName' label='First Name' rules={[{ required: true, message: 'Please input your Last Name!' }]}>
-            <Input />
-          </Item>
-          <Item name='lastName' label='Last Name' rules={[{ required: true, message: 'Please input your Last Name!' }]}>
-            <Input />
-          </Item>
-          <Item
-            name='email'
-            label='Email'
-            rules={[{ required: true, message: 'Please input your Email!' }, { type: 'email', message: 'The input is not valid E-mail!' }]}
-          >
-            <Input type='email' />
-          </Item>
-          <Item><Button type='primary' htmlType='submit'>Edit</Button></Item>
-        </Form>
-      </Col>
-    </Row>
-  )
+  const confirmTwoFa = async (code: string) => {
+    const result = await apiService({
+      url: apiTwoFaConfirmPath,
+      method: 'post',
+      data: { id: user.id, code },
+      isServer: false,
+      updateAuth,
+    })
 
-  const passwordForm = (
-    <Row>
-      <Col xs={24} md={16} lg={12}>
-        <Form form={form} layout='vertical' onFinish={updatePassword}>
-          <Item
-            name='currentPass'
-            label='Enter your current password'
-            rules={[{ required: true, message: 'Please input your password!' }, { min: 6, message: '6 signs minimum' }]}
-          >
-            <Input.Password />
-          </Item>
-          <Item
-            name='newPass'
-            label='Enter your new password'
-            rules={[{ required: true, message: 'Please confirm your password!' }, { min: 6, message: '6 signs minimum' }]}
-          >
-            <Input.Password />
-          </Item>
-          <Item
-            name='confirmPass'
-            label='Confirm your new password'
-            rules={[{ required: true, message: 'Please confirm your password!' }, { min: 6, message: '6 signs minimum' }]}
-          >
-            <Input.Password />
-          </Item>
-          <Item><Button type='primary' htmlType='submit'>Change Password</Button></Item>
-        </Form>
-      </Col>
-    </Row>
-  )
+    if (result.error) setErr(result)
+    else {
+      clearErrState()
+      setStateUser(result)
+      setModal({ isShow: true, text: 'Two factor verification was enabled...' })
+    }
+  }
+
+  const disableTwoFa = async () => {
+    const result = await apiService({
+      url: `${getApiUserUpdatePath(user.id)}`,
+      method: 'patch',
+      data: { isTwoFa: false, twoFaHash: null },
+      isServer: false,
+      updateAuth
+    })
+
+    if (result.error) setErr(result)
+    else {
+      clearErrState()
+      setStateUser(result)
+      setModal({ isShow: true, text: 'Two factor verification was disabled...' })
+    }
+  }
 
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
       label: 'Settings',
-      children: user.firstName && settingsForm
+      children: user.firstName && <Settings user={user} onSubmit={onSubmit} />
     },
     {
       key: '2',
       label: 'Password',
-      children: passwordForm
+      children: <PasswordForm form={form} updatePassword={updatePassword} />
     },
     {
       key: '3',
       label: 'Two Factor Verification',
-      children: 'Two fa'
+      children: (
+        <TwoFa
+          isTwoFa={user.isTwoFa}
+          enableTwoFa={async () => await apiService({ url: `${getApiTwoFaPath(user.id)}`, method: 'get', isServer: false, updateAuth })}
+          disableTwoFa={disableTwoFa}
+          confirmTwoFa={confirmTwoFa}
+        />
+      )
     }
   ]
 
   return (
     <div className='w-90-percent m-auto'>
-      <Tabs defaultActiveKey='1' items={tabItems} onChange={onChange} />
+      <Tabs defaultActiveKey='1' items={tabItems} />
       {err.message ? <Error error={err}/> : null}
-      {isShowModal && <Alert message='Data was updated...' type="success" showIcon />}
+      {modal.isShow && <Alert message={modal.text} type="success" showIcon />}
     </div>
   )
 }

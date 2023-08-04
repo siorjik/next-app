@@ -15,6 +15,8 @@ export const getUserUpdateAppPath = (id: number | string) => `${usersAppPath}/${
 export const apiLoginPath = '/auth/login'
 export const apiRefreshPath = '/auth/refresh'
 export const apiLogoutPath = '/auth/logout'
+export const apiTwoFaConfirmPath = '/auth/confirm-two-fa'
+export const getApiTwoFaPath = (id: string) => `/auth/${id}/two-fa`
 
 // user
 export const apiUsersPath = '/user'

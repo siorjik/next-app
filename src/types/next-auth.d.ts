@@ -14,6 +14,8 @@ declare module "next-auth" {
       error?: [string] | string,
       apiUrl: string,
       webUrl: string,
+      isTwoFa: boolean,
+      twoFaHash: string | null
     } & typeof JWT
   }
 }
