@@ -14,7 +14,7 @@ type ParamsType = {
   method: string,
   name?: string,
   ctx?: GetServerSidePropsContext,
-  data?: { [k: string]: string | number | boolean }
+  data?: { [k: string]: string | number | boolean | null }
   isServer?: boolean,
   updateAuth?: (tokens: TokensType) => {}
   isLogOut?: boolean,
