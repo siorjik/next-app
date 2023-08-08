@@ -17,8 +17,11 @@ const Error = ({ error, className = '' }: { error: ApiErrorType, className?: str
         {
           errMess.length && Array.isArray(errMess) ?
             errMess.map((item, index) =>
-              <Fragment key={index}><Alert className={`error ${className}`} type='error' message={item} banner closable /></Fragment>) :
-            typeof errMess === 'string' ? <Alert className={`error ${className}`} type='error' message={errMess} banner closable /> : null
+              <Fragment key={index}>
+                <Alert className={`error ${className}`} type='error' message={item} banner closable />
+              </Fragment>) :
+            typeof errMess === 'string' ?
+              <Alert className={`error ${className}`} type='error' message={errMess} banner closable /> : null
         }
       </Col>
     </Row>

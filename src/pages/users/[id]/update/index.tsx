@@ -23,8 +23,13 @@ const Updating = ({ user, updateAuth }: { user: UserType, updateAuth: (tokens: T
 
     valuesCopy.isActive = !!values.isActive
 
-    const result =
-      await apiService({ url: getApiUserUpdatePath(query.id as string), method: 'patch', data: valuesCopy, isServer: false, updateAuth })
+    const result = await apiService({
+      url: getApiUserUpdatePath(query.id as string),
+      method: 'patch',
+      data: valuesCopy,
+      isServer: false,
+      updateAuth
+    })
 
     if (result.error) setErr(result)
     else setErr({ message: '', statusCode: 0, error: '' })
@@ -49,7 +54,10 @@ const Updating = ({ user, updateAuth }: { user: UserType, updateAuth: (tokens: T
         <Item 
           name='email' 
           label='Email'
-          rules={[{ required: true, message: 'Please input your Email!' }, { type: 'email', message: 'The input is not valid E-mail!' }]}
+          rules={[
+            { required: true, message: 'Please input your Email!' },
+            { type: 'email', message: 'The input is not valid E-mail!' }
+          ]}
         >
           <Input type='email' />
         </Item>

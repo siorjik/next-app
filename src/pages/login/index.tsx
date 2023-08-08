@@ -38,11 +38,15 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
     else {
       const email = form.getFieldValue('email') as string
 
-      const result = await apiService({ url: `${apiUrl}${apiUserRecoverPasswordPath}`, method: 'post', data: { email }, isServer: false })
+      const result =
+        await apiService({ url: `${apiUrl}${apiUserRecoverPasswordPath}`, method: 'post', data: { email }, isServer: false })
 
       form.resetFields()
 
-      setModal({ ...modal, text: !result.error ? 'Done! Check your email please' : <span className='error'>{result.message}</span> })
+      setModal({
+        ...modal,
+        text: !result.error ? 'Done! Check your email please' : <span className='error'>{result.message}</span>
+      })
     }
   }
 
@@ -63,7 +67,10 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
         <Item
           name='email'
           label='Email'
-          rules={[{ required: true, message: 'Please input your Email!' }, { type: 'email', message: 'The input is not valid E-mail!' }]}
+          rules={[
+            { required: true, message: 'Please input your Email!' },
+            { type: 'email', message: 'The input is not valid E-mail!' }
+          ]}
         >
           <Input type='email' />
         </Item>
@@ -90,7 +97,10 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
             <Item
               name='email'
               label='Email'
-              rules={[{ required: true, message: 'Please input your Email!' }, { type: 'email', message: 'The input is not valid E-mail!' }]}
+              rules={[
+                { required: true, message: 'Please input your Email!' },
+                { type: 'email', message: 'The input is not valid E-mail!' }
+              ]}
             >
               <Input type='email' />
             </Item>}
