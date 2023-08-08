@@ -10,7 +10,13 @@ import Settings from './Settings'
 
 import { ApiErrorType } from '@/types/errorType'
 import apiService from '@/services/apiService'
-import { apiTwoFaConfirmPath, getApiTwoFaPath, getApiUserPath, getApiUserUpdatePasswordPath, getApiUserUpdatePath } from '@/utils/paths'
+import {
+  apiTwoFaConfirmPath,
+  getApiTwoFaPath,
+  getApiUserPath,
+  getApiUserUpdatePasswordPath,
+  getApiUserUpdatePath
+} from '@/utils/paths'
 import { TokensType } from '@/types/tokenType'
 import { ProfileUserType, UserType } from '@/types/userType'
 import withAuth from '@/hoc/withAuth'
@@ -26,7 +32,8 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
     (async () => {
       const session = await getSession()
 
-      const user: UserType = await apiService({ url: getApiUserPath(session?.user.id), method: 'get', isServer: false, updateAuth })
+      const user: UserType =
+        await apiService({ url: getApiUserPath(session?.user.id), method: 'get', isServer: false, updateAuth })
       
       setStateUser(user)
     })()
@@ -140,7 +147,9 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
       children: (
         <TwoFa
           isTwoFa={user.isTwoFa}
-          enableTwoFa={async () => await apiService({ url: `${getApiTwoFaPath(user.id)}`, method: 'get', isServer: false, updateAuth })}
+          enableTwoFa={
+            async () => await apiService({ url: `${getApiTwoFaPath(user.id)}`, method: 'get', isServer: false, updateAuth })
+          }
           disableTwoFa={disableTwoFa}
           confirmTwoFa={confirmTwoFa}
         />

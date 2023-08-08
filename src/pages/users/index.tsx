@@ -32,7 +32,8 @@ const User = ({ users, updateAuth }: { users: UserType[], updateAuth: (tokens: T
 
     if (deletedUsersEmails.length) {
       userList.forEach((user: UserType) => {
-        if (!deletedUsersEmails.find((email: string) => email === user.email) && !list.find((item: UserType) => item.id === user.id)) list.push(user)
+        if (!deletedUsersEmails.find((email: string) => email === user.email) &&
+          !list.find((item: UserType) => item.id === user.id)) list.push(user)
       })
     } else list = userList
 
@@ -41,24 +42,26 @@ const User = ({ users, updateAuth }: { users: UserType[], updateAuth: (tokens: T
 
   const remove = async (id: number) => {
     const result = await apiService({ url: getApiUserDeletePath(id), method: 'delete', isServer: false, updateAuth })
-    
+
     if (result.error) router.replace('/error?signOut=true')
     else setUserList(userList.filter(user => user.id !== id))
   }
-  
+
   return (
     <>
       <h2 className='mb-30'>Users page</h2>
       <Space direction='vertical'>
         {
           userList && userList.map((user: UserType) => (
-            <Card 
+            <Card
               key={user.id}
               title={`${user.firstName} ${user.lastName}`}
               extra={<Link className='ml-20' href={getUserAppPath(user.id)}>Details</Link>}
             >
               <div className='flex j-content-space-around'>
-                <Link href={getUserUpdateAppPath(user.id)}><EditFilled style={{ fontSize: '25px', cursor: 'pointer', color: 'grey' }} /></Link>
+                <Link href={getUserUpdateAppPath(user.id)}>
+                  <EditFilled style={{ fontSize: '25px', cursor: 'pointer', color: 'grey' }} />
+                </Link>
                 <DeleteFilled style={{ fontSize: '25px', cursor: 'pointer', color: 'grey' }} onClick={() => remove(user.id)} />
               </div>
             </Card>

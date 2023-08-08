@@ -43,7 +43,10 @@ const UserCreating = ({ apiUrl }: { apiUrl: string }) => {
         <Item 
           name='email' 
           label='Email' 
-          rules={[{ required: true, message: 'Please input your Email!' }, { type: 'email', message: 'The input is not valid E-mail!' }]}
+          rules={[
+            { required: true, message: 'Please input your Email!' },
+            { type: 'email', message: 'The input is not valid E-mail!' }
+          ]}
         >
           <Input type='email' />
         </Item>

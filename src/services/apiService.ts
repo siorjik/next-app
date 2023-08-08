@@ -28,7 +28,9 @@ type sessionUserType = {
 }
 
 export default async (params: ParamsType) => {
-  let { url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false } = params
+  let {
+    url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false
+  } = params
   let session = { user: { accessToken: '', refreshToken: '', apiUrl: '', webUrl: '' } }
 
   if (!isLogIn) {
@@ -36,7 +38,9 @@ export default async (params: ParamsType) => {
     else session = { ...session, user: { ...await getToken({ req: ctx?.req as NextApiRequest }) } as sessionUserType & UserType }
   }
 
-  const axiosInstance = axios.create({ withCredentials: true, baseURL: process.env.API_HOST || (session?.user.webUrl || session?.user.apiUrl) })
+  const axiosInstance = axios.create({
+    withCredentials: true, baseURL: process.env.API_HOST || (session?.user.webUrl || session?.user.apiUrl)
+  })
 
   const setAuthHeader = (token: string) => axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`
   const getRequest = async () => axiosInstance[method as RequestMethodType](url, { ...data })

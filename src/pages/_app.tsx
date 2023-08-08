@@ -22,7 +22,10 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
   ) {
     return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
   } else if (pathname === profileAppPath) {
-    return <SessionProvider session={session}><LayoutWithoutSidebar><Component { ...pageProps } /></LayoutWithoutSidebar></SessionProvider>
+    return (
+      <SessionProvider session={session}>
+        <LayoutWithoutSidebar><Component {...pageProps} /></LayoutWithoutSidebar>
+      </SessionProvider>)
   }
 
   return <SessionProvider session={session}><Layout><Component {...pageProps} /></Layout></SessionProvider>

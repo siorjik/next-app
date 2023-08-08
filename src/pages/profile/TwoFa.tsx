@@ -46,7 +46,9 @@ const TwoFa = ({
           <h3>Your two factor vericfication is enable.</h3>
           <Button className='mb-20 mt-20' type='default' onClick={disableTwoFa}>Disable Two Factor Verification</Button>
         </> :
-          <Button className='mb-20' type='default' onClick={() => setActive(true)} disabled={!!qrUrl}>Enable Two Factor Verification</Button>
+          <Button className='mb-20' type='default' onClick={() => setActive(true)} disabled={!!qrUrl}>
+            Enable Two Factor Verification
+          </Button>
       }
       {
         isActive && qrUrl &&
