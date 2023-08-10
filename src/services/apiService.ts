@@ -20,18 +20,13 @@ type ParamsType = {
   isLogOut?: boolean,
   isLogIn?: boolean,
 }
-type sessionUserType = {
-  accessToken: '',
-  refreshToken: '',
-  apiUrl: '',
-  webUrl: '',
-}
+type sessionUserType = { accessToken: '', refreshToken: '' }
 
 export default async (params: ParamsType) => {
   let {
     url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false
   } = params
-  let session = { user: { accessToken: '', refreshToken: '', apiUrl: '', webUrl: '' } }
+  let session = { user: { accessToken: '', refreshToken: '' } }
 
   if (!isLogIn) {
     if (!isServer) session = { ...session, ...await getSession() }
@@ -39,7 +34,7 @@ export default async (params: ParamsType) => {
   }
 
   const axiosInstance = axios.create({
-    withCredentials: true, baseURL: process.env.API_HOST || (session?.user.webUrl || session?.user.apiUrl)
+    withCredentials: true, baseURL: process.env.NEXT_PUBLIC_WEB_HOST || process.env.NEXT_PUBLIC_API_HOST
   })
 
   const setAuthHeader = (token: string) => axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`

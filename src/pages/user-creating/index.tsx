@@ -11,14 +11,18 @@ import { ApiErrorType } from '@/types/errorType'
 
 const { Item } = Form
 
-const UserCreating = ({ apiUrl }: { apiUrl: string }) => {
+const UserCreating = () => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
   const [isShowAlert, setShowAlert] = useState(false)
 
   const [form] = Form.useForm()
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
-    const result = await apiService({ url: `${apiUrl}${apiUserCreatePath}`, data: { ...values, isActive: false }, method: 'post', isServer: false })
+    const result = await apiService({
+      url: apiUserCreatePath,
+      data: { ...values, isActive: false },
+      method: 'post', isServer: false
+    })
     
     if (result.error) setErr(result)
     else {
@@ -67,9 +71,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  const apiUrl = process.env.APP_ENV === 'development' ? process.env.API_HOST : process.env.WEB_HOST
-
-  return { props: { apiUrl } }
+  return { props: {} }
 }
 
 export default UserCreating

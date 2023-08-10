@@ -6,7 +6,14 @@ import 'antd/dist/reset.css'
 import '@/styles/index.scss'
 
 import Layout from '@/components/Layout'
-import { loginAppPath, passwordCreatingAppPath, passwordRecoverAppPath, profileAppPath, userCreatingAppPath } from '@/utils/paths'
+import {
+  loginAppPath,
+  passwordCreatingAppPath,
+  passwordRecoverAppPath,
+  profileAppPath,
+  twoFaAppPath,
+  userCreatingAppPath
+} from '@/utils/paths'
 import LayoutWithoutSidebar from '@/components/Layout/LayoutWithoutSidebar'
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
@@ -18,7 +25,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     pathname === '/error' ||
     pathname === userCreatingAppPath ||
     pathname === passwordCreatingAppPath ||
-    pathname === passwordRecoverAppPath
+    pathname === passwordRecoverAppPath ||
+    pathname === twoFaAppPath
   ) {
     return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
   } else if (pathname === profileAppPath) {

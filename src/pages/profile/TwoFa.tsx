@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, QRCode, Row, Col, Input } from 'antd'
+import { Button, QRCode, Row, Col } from 'antd'
 
-const { Item } = Form
+import TwoFaComp from '../../components/TwoFa'
 
 const TwoFa = ({
   enableTwoFa, disableTwoFa, confirmTwoFa, isTwoFa
@@ -13,8 +13,6 @@ const TwoFa = ({
 }) => {
   const [isActive, setActive] = useState(false)
   const [qrUrl, setQrUrl] = useState('')
-
-  const [form] = Form.useForm()
 
   useEffect(() => {
     (async () => {
@@ -33,12 +31,6 @@ const TwoFa = ({
     }
   }, [isTwoFa])
 
-  const onSubmit = async (values: { code: string }) => await confirmTwoFa(values.code)
-
-  const onChangeCode = (values: { code: string }) => {
-    if (isNaN(+values.code)) form.setFieldValue('code', values.code.substring(0, values.code.length - 1))
-  }
-
   return (
     <>
       {
@@ -55,12 +47,7 @@ const TwoFa = ({
         <Row className='mb-20'>
           <Col xs={24} sm={6}>
             <QRCode className='mt-20 mb-20' value={qrUrl} />
-            <Form form={form} layout='vertical' onFinish={onSubmit} onValuesChange={onChangeCode}>
-              <Item name='code' label='Verification code' rules={[{ required: true, message: 'Input verification code!' }]}>
-                <Input className='h-50 w-120 fs-25' maxLength={6} />
-              </Item>
-              <Button type='primary' htmlType='submit'>Submit</Button>
-            </Form>
+            <TwoFaComp onSubmit={async (code: string) => await confirmTwoFa(code)} />
           </Col>
         </Row>
       }

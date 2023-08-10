@@ -4,7 +4,7 @@ import { GetServerSidePropsContext } from 'next'
 
 export default async (ctx: GetServerSidePropsContext | undefined = undefined) => {
   const session = await getSession(ctx)
-  const url = (session?.user.webUrl || session?.user.apiUrl).replace('/api', '')
+  const url = (process.env.NEXT_PUBLIC_WEB_HOST! || process.env.NEXT_PUBLIC_API_HOST!).replace('/api', '')
 
   return io(url as string)
 }
