@@ -5,7 +5,7 @@ import { getSession } from 'next-auth/react'
 
 import Error from '@/components/Error'
 import TwoFa from './TwoFa'
-import PasswordForm from './PasswordForm'
+import Password from './Password'
 import Settings from './Settings'
 
 import { ApiErrorType } from '@/types/errorType'
@@ -139,7 +139,7 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
     {
       key: '2',
       label: 'Password',
-      children: <PasswordForm form={form} updatePassword={updatePassword} />
+      children: <Password form={form} updatePassword={updatePassword} />
     },
     {
       key: '3',

@@ -68,5 +68,9 @@ footer {
   form {
     width: 300px;
     text-align: center;
+
+    .ant-form-item-label {
+      text-align: center;
+    }
   }
 }

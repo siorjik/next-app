@@ -6,29 +6,49 @@ import { getSession, signIn, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 
 import Error from '@/components/Error'
-import { apiUserRecoverPasswordPath, userCreatingAppPath } from '@/utils/paths'
+import { apiCheckTwoFaPath, apiUserRecoverPasswordPath, userCreatingAppPath } from '@/utils/paths'
 import apiService from '@/services/apiService'
 import { ApiErrorType } from '@/types/errorType'
+import setFormNumberValue from '@/helpers/setFormNumberValue'
 
 const { Item } = Form
 
-const Login = ({ apiUrl }: { apiUrl: string }) => {
+const Login = () => {
   const [modal, setModal] = useState<{ text: string | ReactElement, isShow: boolean }>({ text: '', isShow: false })
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
+  const [isTwoFaStep, setTwoFaStep] = useState(false)
 
   const router = useRouter()
   const { data } = useSession()
 
   const [form] = Form.useForm()
+  const [loginForm] = Form.useForm()
 
   useEffect(() => {
     if (data?.user.id) router.push('/')
   }, [data, router])
 
-  const onSubmit = async (values: { email: string, password: string }) => {
-    const res = await signIn('credentials', { redirect: false, ...values })
+  const onSubmit = async (values: { email: string, password: string, code?: string }) => {
+    if (isTwoFaStep) {
+      const login = await signIn('credentials', { redirect: false, ...values })
 
-    if (res?.error) setErr({ message: res.error })
+      if (login?.error) setErr({ message: login.error })
+    } else {
+      const result = await apiService({
+        url: apiCheckTwoFaPath,
+        method: 'post',
+        data: { email: values.email },
+        isLogIn: true,
+        isServer: false
+      })
+
+      if (result?.error) setErr(result)
+      else if (!result.isTwoFa) {
+        const login = await signIn('credentials', { redirect: false, ...values })
+
+        if (login?.error) setErr({ message: login.error })
+      } else setTwoFaStep(true)
+    }
   }
 
   const handleOk = async () => {
@@ -39,7 +59,7 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
       const email = form.getFieldValue('email') as string
 
       const result =
-        await apiService({ url: `${apiUrl}${apiUserRecoverPasswordPath}`, method: 'post', data: { email }, isServer: false })
+        await apiService({ url: apiUserRecoverPasswordPath, method: 'post', data: { email }, isServer: false })
 
       form.resetFields()
 
@@ -61,8 +81,10 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
       <h2>Login</h2>
 
       <Form
+        form={loginForm}
         layout='vertical'
         onFinish={onSubmit}
+        onValuesChange={({ code }: { code: string }) => code && setFormNumberValue(code, loginForm, 'code')}
       >
         <Item
           name='email'
@@ -77,6 +99,10 @@ const Login = ({ apiUrl }: { apiUrl: string }) => {
         <Item name='password' label='Password' rules={[{ required: true, message: 'Please input your Password!' }]}>
           <Input.Password />
         </Item>
+        {isTwoFaStep &&
+          <Item name='code' label='Verification Code' rules={[{ required: true, message: 'Please input verification code!' }]}>
+            <Input className='h-50 w-120 fs-25' maxLength={6} />
+          </Item>}
         <Item><Button type='primary' htmlType='submit'>Login</Button></Item>
       </Form>
 
@@ -115,9 +141,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  const apiUrl = process.env.APP_ENV === 'development' ? process.env.API_HOST : process.env.WEB_HOST
-
-  return { props: { apiUrl } }
+  return { props: {} }
 }
 
 export default Login

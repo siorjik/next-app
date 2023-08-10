@@ -14,7 +14,11 @@ const Creating = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) =>
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
-    const result = await apiService({ url: apiUserCreatePath, data: { ...values, isActive: false }, method: 'post', isServer: false, updateAuth })
+    const result = await apiService({
+      url: apiUserCreatePath,
+      data: { ...values, isActive: false },
+      method: 'post', isServer: false, updateAuth }
+    )
     
     if (result.error) setErr(result)
     else setErr({ message: '', statusCode: 0, error: '' })

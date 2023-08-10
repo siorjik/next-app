@@ -13,7 +13,7 @@ type ObjType = { [k: string]: string | number }
 
 const { Item } = Form
 
-const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
+const PasswordCreating = () => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
 
   const [messageApi, contextHolder] = message.useMessage()
@@ -31,7 +31,7 @@ const PasswordCreating = ({ apiUrl }: { apiUrl: string }) => {
     }
 
     const result = await apiService({
-      url: `${apiUrl}${apiUserCreatePasswordPath}`,
+      url: apiUserCreatePasswordPath,
       data: { password: pass, token: query.accessToken as string },
       method: 'post',
       isServer: false,
@@ -85,9 +85,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session) return { redirect: { destination: '/', permanent: false } }
 
-  const apiUrl = process.env.APP_ENV === 'development' ? process.env.API_HOST : process.env.WEB_HOST
-
-  return { props: { apiUrl } }
+  return { props: {} }
 }
 
 export default PasswordCreating
