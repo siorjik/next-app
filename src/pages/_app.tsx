@@ -11,7 +11,6 @@ import {
   passwordCreatingAppPath,
   passwordRecoverAppPath,
   profileAppPath,
-  twoFaAppPath,
   userCreatingAppPath
 } from '@/utils/paths'
 import LayoutWithoutSidebar from '@/components/Layout/LayoutWithoutSidebar'
@@ -25,8 +24,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     pathname === '/error' ||
     pathname === userCreatingAppPath ||
     pathname === passwordCreatingAppPath ||
-    pathname === passwordRecoverAppPath ||
-    pathname === twoFaAppPath
+    pathname === passwordRecoverAppPath
   ) {
     return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
   } else if (pathname === profileAppPath) {
