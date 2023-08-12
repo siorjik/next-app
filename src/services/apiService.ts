@@ -20,7 +20,7 @@ type ParamsType = {
   isLogOut?: boolean,
   isLogIn?: boolean,
 }
-type sessionUserType = { accessToken: '', refreshToken: '' }
+type sessionUserType = UserType & { accessToken: '', refreshToken: '' }
 
 export default async (params: ParamsType) => {
   let {
@@ -30,15 +30,15 @@ export default async (params: ParamsType) => {
 
   if (!isLogIn) {
     if (!isServer) session = { ...session, ...await getSession() }
-    else session = { ...session, user: { ...await getToken({ req: ctx?.req as NextApiRequest }) } as sessionUserType & UserType }
+    else session = { ...session, user: { ...await getToken({ req: ctx?.req as NextApiRequest }) } as sessionUserType }
   }
 
   const axiosInstance = axios.create({
-    withCredentials: true, baseURL: process.env.NEXT_PUBLIC_WEB_HOST || process.env.NEXT_PUBLIC_API_HOST
+    withCredentials: true, baseURL: (!isServer && process.env.NEXT_PUBLIC_WEB_HOST) || process.env.NEXT_PUBLIC_API_HOST
   })
 
   const setAuthHeader = (token: string) => axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`
-  const getRequest = async () => axiosInstance[method as RequestMethodType](url, { ...data })
+  const getRequest = async () => await axiosInstance[method as RequestMethodType](url, { ...data })
   const getLogOutUrl = (token: string) => `${apiLogoutPath}?refresh=${token}`
 
   try {
