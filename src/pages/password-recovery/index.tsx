@@ -71,7 +71,7 @@ const PasswordRecovery = () => {
         <Item><Button type='primary' htmlType='submit'>Change Password</Button></Item>
       </Form>
 
-      {err.message ? <Error error={err} /> : null}
+      <Error error={err} respWidth={{ xs: 24 }} />
 
       {contextHolder}
     </div>

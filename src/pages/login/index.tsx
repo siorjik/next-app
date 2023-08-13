@@ -106,7 +106,7 @@ const Login = () => {
         <Item><Button type='primary' htmlType='submit'>Login</Button></Item>
       </Form>
 
-      {err.message ? <Error error={err} /> : null}
+      <Error error={err} respWidth={{ xs: 24 }} />
 
       <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
       <p className='mt-20 pointer' onClick={() => setModal({ ...modal, isShow: true })}>Forgot your password?</p>

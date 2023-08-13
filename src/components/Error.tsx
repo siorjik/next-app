@@ -1,19 +1,31 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Alert, Row, Col } from "antd"
 import { useRouter } from 'next/router'
 
 import { loginAppPath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
 
-const Error = ({ error, className = '' }: { error: ApiErrorType, className?: string }) => {
-  const { statusCode, message: errMess } = error
+const Error = (
+  { error, className = '', respWidth }:
+  { error: ApiErrorType, className?: string, respWidth?: {[k:string]: number } }
+) => {
+  const [isShow, setShow] = useState(false)
   const { replace, pathname } = useRouter()
+
+  const { statusCode, message: errMess } = error
+
+  useEffect(() => {
+    if (errMess) setShow(true)
+    else setShow(false)
+  }, [errMess])
 
   if (statusCode && statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true')
 
-  return (
+  const widthObj = respWidth || { xs: 24, md: 16, lg: 12 }
+
+  const alert = (
     <Row>
-      <Col xs={24} md={16} lg={12}>
+      <Col {...widthObj}>
         {
           errMess.length && Array.isArray(errMess) ?
             errMess.map((item, index) =>
@@ -26,6 +38,8 @@ const Error = ({ error, className = '' }: { error: ApiErrorType, className?: str
       </Col>
     </Row>
   )
+
+  return <>{isShow ? alert : null}</>
 }
 
 export default Error
