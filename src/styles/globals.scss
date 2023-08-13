@@ -55,7 +55,10 @@ footer {
 }
 
 .primary-form {
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 1000px;
+  padding: 10px;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   align-items: center;

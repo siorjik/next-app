@@ -57,7 +57,7 @@ const UserCreating = () => {
         <Item><Button type='primary' htmlType='submit'>Create</Button></Item>
       </Form>
 
-      {err.error ? <Error error={err} /> : null}
+      <Error error={err} respWidth={{ xs: 24 }} />
 
       {isShowAlert && <Alert message='Account was created. Check your mail to continue...' type="success" showIcon />}
 

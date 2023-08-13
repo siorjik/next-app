@@ -73,7 +73,7 @@ const PasswordCreating = () => {
         <Item><Button type='primary' htmlType='submit'>Create Password</Button></Item>
       </Form>
 
-      {err.message ? <Error error={err} /> : null}
+      <Error error={err} respWidth={{ xs: 24 }} />
 
       {contextHolder}
     </div>

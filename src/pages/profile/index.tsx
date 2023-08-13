@@ -160,7 +160,7 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
   return (
     <div className='w-90-percent m-auto'>
       <Tabs defaultActiveKey='1' items={tabItems} />
-      {err.message ? <Error error={err}/> : null}
+      <Error error={err}/>
       {modal.isShow && <Alert message={modal.text} type="success" showIcon />}
     </div>
   )
