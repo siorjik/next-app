@@ -93,3 +93,9 @@ $items: center, end;
 .pointer {
   cursor: pointer;
 }
+
+.position {
+  &-absolute {
+    position: absolute;
+  }
+}

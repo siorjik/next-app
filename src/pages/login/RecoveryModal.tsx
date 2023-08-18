@@ -56,55 +56,6 @@ const RecoveryModal = ({ recoveryPassword, resetTwoFa, modal, setModal }: PropsT
   const clearModalState = () => setModal({ isShow: false, text: '', isTwoFa: false, title: '' })
   const clearErrState = () => setErr({ message: '', statusCode: 0, error: '' })
 
-  const modalPassContent = (
-    <>
-      {modal?.text ? <Alert type='success' message={modal.text} /> : <>
-        <p>Please enter your email...</p>
-        <Form form={form} onValuesChange={() => clearErrState()}>
-          <>
-            <Item
-              name='email'
-              label='Email'
-              rules={[
-                { required: true, message: 'Please input your Email!' },
-                { type: 'email', message: 'The input is not valid E-mail!' }
-              ]}
-            >
-              <Input type='email' />
-            </Item>
-          </>
-        </Form>
-      </>
-      }
-    </>
-  )
-
-  const modalTwoFaContent = (
-    <>
-      {modal?.text ? <Alert type='success' message={modal.text} /> : <>
-        <p>Please enter your email and password...</p>
-        <Form form={form} onValuesChange={() => clearErrState()}>
-          <>
-            <Item
-              name='email'
-              label='Email'
-              rules={[
-                { required: true, message: 'Please input your Email!' },
-                { type: 'email', message: 'The input is not valid E-mail!' }
-              ]}
-            >
-              <Input type='email' />
-            </Item>
-            <Item name='password' label='Password' rules={[{ required: true, message: 'Please input your Password!' }]}>
-              <Input.Password />
-            </Item>
-          </>
-        </Form>
-      </>
-      }
-    </>
-  )
-
   return (
     <Modal
       title={modal?.title}
@@ -112,7 +63,29 @@ const RecoveryModal = ({ recoveryPassword, resetTwoFa, modal, setModal }: PropsT
       onOk={handleOk}
       onCancel={onCancel}
     >
-      {modal?.isTwoFa ? modalTwoFaContent : modalPassContent}
+      {modal?.text ? <Alert type='success' message={modal.text} /> : <>
+        <p>{modal.isTwoFa ? 'Please enter your email and password...' : 'Please enter your email...'}</p>
+        <Form form={form} onValuesChange={() => clearErrState()}>
+          <>
+            <Item
+              name='email'
+              label='Email'
+              rules={[
+                { required: true, message: 'Please input your Email!' },
+                { type: 'email', message: 'The input is not valid E-mail!' }
+              ]}
+            >
+              <Input type='email' />
+            </Item>
+            {
+              modal.isTwoFa &&
+              <Item name='password' label='Password' rules={[{ required: true, message: 'Please input your Password!' }]}>
+                <Input.Password />
+              </Item>
+            }
+          </>
+        </Form>
+      </>}
       <Error error={err} className='mb-20' />
     </Modal>
   )
