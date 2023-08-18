@@ -17,7 +17,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         },
         async authorize(credentials) {
           const result =
-            await apiService({ url: apiLoginPath, data: credentials, method: 'post', name: 'sessionUser', isLogIn: true })
+            await apiService({ url: apiLoginPath, data: credentials, method: 'post', name: 'sessionUser', withoutAuthFlow: true })
 
           if (result.props && result.props.sessionUser) return result.props.sessionUser
           else throw new Error(result)

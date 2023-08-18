@@ -18,17 +18,25 @@ type ParamsType = {
   isServer?: boolean,
   updateAuth?: (tokens: TokensType) => {}
   isLogOut?: boolean,
-  isLogIn?: boolean,
+  withoutAuthFlow?: boolean,
 }
 type sessionUserType = UserType & { accessToken: '', refreshToken: '' }
 
 export default async (params: ParamsType) => {
   let {
-    url, method, ctx = undefined, name = '', data = {}, isServer = true, updateAuth = () => { }, isLogOut = false, isLogIn = false
+    url,
+    method,
+    ctx = undefined,
+    name = '',
+    data = {},
+    isServer = true,
+    updateAuth = () => { },
+    isLogOut = false,
+    withoutAuthFlow = false,
   } = params
   let session = { user: { accessToken: '', refreshToken: '' } }
 
-  if (!isLogIn) {
+  if (!withoutAuthFlow) {
     if (!isServer) session = { ...session, ...await getSession() }
     else session = { ...session, user: { ...await getToken({ req: ctx?.req as NextApiRequest }) } as sessionUserType }
   }
@@ -49,7 +57,7 @@ export default async (params: ParamsType) => {
     return isServer ? { props: { [name]: result.data } } : result.data
   } catch (error) {
     if (error.response!.status == 401) {
-      if (isLogIn) return error.response.data
+      if (withoutAuthFlow) return error.response.data
 
       try {
         const tokens = await axiosInstance.get(`${apiRefreshPath}?refresh=${session?.user.refreshToken}`)

@@ -6,7 +6,7 @@ import { GetServerSideProps } from 'next'
 
 import apiService from "@/services/apiService"
 import Error from "@/components/Error"
-import { apiUserRecoverPasswordPath, loginAppPath } from '@/utils/paths'
+import { apiUserCreatePasswordPath, loginAppPath } from '@/utils/paths'
 import { ApiErrorType } from '@/types/errorType'
 
 type ObjType = { [k: string]: string | number }
@@ -31,8 +31,8 @@ const PasswordRecovery = () => {
     }
 
     const result = await apiService({
-      url: apiUserRecoverPasswordPath,
-      data: { email: query.email as string, password: pass, token: query.accessToken as string },
+      url: apiUserCreatePasswordPath,
+      data: { password: pass, token: query.token as string },
       method: 'post',
       isServer: false,
     })
