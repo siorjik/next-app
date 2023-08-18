@@ -1,46 +1,78 @@
-import { ReactElement, useEffect, useState } from 'react'
-import { Button, Form, Input, Modal } from 'antd'
+import { ReactElement, useCallback, useEffect, useState } from 'react'
+import { Alert, Row, Col } from 'antd'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { getSession, signIn, useSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
 
 import Error from '@/components/Error'
-import { apiCheckTwoFaPath, apiUserRecoverPasswordPath, userCreatingAppPath } from '@/utils/paths'
+import RecoveryModal from './RecoveryModal'
+
+import {
+  apiCheckTwoFaPath,
+  apiResetTwoFaPath,
+  apiUserRecoverPasswordPath,
+  userCreatingAppPath,
+  apiResetTwoEmailFaPath
+} from '@/utils/paths'
 import apiService from '@/services/apiService'
 import { ApiErrorType } from '@/types/errorType'
-import setFormNumberValue from '@/helpers/setFormNumberValue'
+import LoginForm from './LoginForm'
 
-const { Item } = Form
+type ModalStateType = { isShow: boolean, isTwoFa: boolean, title: string, text: string | ReactElement }
 
 const Login = () => {
-  const [modal, setModal] = useState<{ text: string | ReactElement, isShow: boolean }>({ text: '', isShow: false })
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
   const [isTwoFaStep, setTwoFaStep] = useState(false)
+  const [alert, setAlert] = useState<{ isShow: boolean, text: string, isErr: boolean }>({ isShow: false, text: '', isErr: false })
+  const [modal, setModal] = useState<ModalStateType>({ isShow: false, isTwoFa: false, title: '', text: '' })
 
   const router = useRouter()
   const { data } = useSession()
 
-  const [form] = Form.useForm()
-  const [loginForm] = Form.useForm()
+  useEffect(() => {
+    (async () => {
+      const { resetTwoFa, token } = router.query
+
+      if (resetTwoFa && token) {
+        const result = await apiService({
+          url: apiResetTwoFaPath,
+          method: 'post',
+          data: { token: token as string },
+          isServer: false,
+          withoutAuthFlow: true
+        })
+
+        if (!result.error) {
+          setAlert({ ...alert, isShow: true, text: 'Your two factor verification was disabled' })
+        } else setAlert({ isShow: true, text: 'Two factor verification reset error, link was expired', isErr: true })
+
+        setTimeout(() => setAlert({ ...alert, isShow: false, text: '' }), 5000)
+      }
+    })()
+  }, [])
 
   useEffect(() => {
     if (data?.user.id) router.push('/')
   }, [data, router])
 
-  const onSubmit = async (values: { email: string, password: string, code?: string }) => {
+  const checkTwoFa = async (email: string) => (
+    await apiService({
+      url: apiCheckTwoFaPath,
+      method: 'post',
+      data: { email },
+      withoutAuthFlow: true,
+      isServer: false
+    })
+  )
+
+  const onSubmit = useCallback(async (values: { email: string, password: string, code?: string }) => {
     if (isTwoFaStep) {
       const login = await signIn('credentials', { redirect: false, ...values })
 
       if (login?.error) setErr({ message: login.error })
     } else {
-      const result = await apiService({
-        url: apiCheckTwoFaPath,
-        method: 'post',
-        data: { email: values.email },
-        isLogIn: true,
-        isServer: false
-      })
+      const result = await checkTwoFa(values.email)
 
       if (result?.error) setErr(result)
       else if (!result.isTwoFa) {
@@ -49,90 +81,58 @@ const Login = () => {
         if (login?.error) setErr({ message: login.error })
       } else setTwoFaStep(true)
     }
+  }, [isTwoFaStep])
+
+  const recoveryPassword = async (email: string) => {
+    return await apiService({ url: apiUserRecoverPasswordPath, method: 'post', data: { email }, isServer: false })
   }
 
-  const handleOk = async () => {
-    if (modal.text) setModal({ isShow: false, text: '' })
-    else if (form?.getFieldError('email').length) return
-    else if (!form.getFieldValue('email')) form.validateFields()
-    else {
-      const email = form.getFieldValue('email') as string
-
-      const result =
-        await apiService({ url: apiUserRecoverPasswordPath, method: 'post', data: { email }, isServer: false })
-
-      form.resetFields()
-
-      setModal({
-        ...modal,
-        text: !result.error ? 'Done! Check your email please' : <span className='error'>{result.message}</span>
-      })
-    }
+  const resetTwoFa = async (email: string, password: string) => {
+    return await apiService({
+      url: apiResetTwoEmailFaPath,
+      method: 'post',
+      data: { email, password },
+      isServer: false,
+      withoutAuthFlow: true
+    })
   }
 
-  const onCancel = () => {
-    form.resetFields()
-
-    setModal({ isShow: false, text: '' })
-  }
+  const setModalData = useCallback((data: ModalStateType) => setModal({ ...data }), [modal])
 
   return (
-    <div className='primary-form'>
-      <h2>Login</h2>
+    <>
+      {
+        alert.isShow &&
+        <Row className='mt-20 p-10'>
+          <Col xs={24} md={16} className='m-auto'>
+            <Alert message={alert.text} type={alert.isErr ? 'error' : 'warning'} showIcon />
+          </Col>
+        </Row>
+      }
 
-      <Form
-        form={loginForm}
-        layout='vertical'
-        onFinish={onSubmit}
-        onValuesChange={({ code }: { code: string }) => code && setFormNumberValue(code, loginForm, 'code')}
-      >
-        <Item
-          name='email'
-          label='Email'
-          rules={[
-            { required: true, message: 'Please input your Email!' },
-            { type: 'email', message: 'The input is not valid E-mail!' }
-          ]}
+      <div className='primary-form'>
+        <LoginForm onSubmit={onSubmit} isTwoFaStep={isTwoFaStep} />  
+        <Error error={err} respWidth={{ xs: 24 }} />
+
+        <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
+        <p className='mt-20 pointer' onClick={() => setModal({ ...modal, isShow: true, title: 'Password recovery' })}>
+          Forgot your password?
+        </p>
+        <p
+          className='pointer'
+          onClick={() => setModal({ ...modal, isShow: true, isTwoFa: true, title: 'Two factor verification reset' })}
         >
-          <Input type='email' />
-        </Item>
-        <Item name='password' label='Password' rules={[{ required: true, message: 'Please input your Password!' }]}>
-          <Input.Password />
-        </Item>
-        {isTwoFaStep &&
-          <Item name='code' label='Verification Code' rules={[{ required: true, message: 'Please input verification code!' }]}>
-            <Input className='h-50 w-120 fs-25' maxLength={6} />
-          </Item>}
-        <Item><Button type='primary' htmlType='submit'>Login</Button></Item>
-      </Form>
+          Reset two factor verification
+        </p>
 
-      <Error error={err} respWidth={{ xs: 24 }} />
-
-      <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>
-      <p className='mt-20 pointer' onClick={() => setModal({ ...modal, isShow: true })}>Forgot your password?</p>
-
-      <Modal
-        title='Password recovery'
-        open={modal.isShow}
-        onOk={handleOk}
-        onCancel={onCancel}
-      >
-        <p>Please enter your email...</p>
-        <Form form={form}>
-          {modal.text ? <p>{modal.text}</p> :
-            <Item
-              name='email'
-              label='Email'
-              rules={[
-                { required: true, message: 'Please input your Email!' },
-                { type: 'email', message: 'The input is not valid E-mail!' }
-              ]}
-            >
-              <Input type='email' />
-            </Item>}
-        </Form>
-      </Modal>
-    </div>
+        <RecoveryModal
+          recoveryPassword={recoveryPassword}
+          resetTwoFa={resetTwoFa}
+          modal={modal}
+          setModal={setModalData}
+        />
+      </div>
+    </>
   )
 }
 

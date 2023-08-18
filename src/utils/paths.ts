@@ -17,6 +17,8 @@ export const apiRefreshPath = '/auth/refresh'
 export const apiLogoutPath = '/auth/logout'
 export const apiTwoFaConfirmPath = '/auth/confirm-two-fa'
 export const apiCheckTwoFaPath = '/auth/check-two-fa'
+export const apiResetTwoFaPath = '/auth/reset-two-fa'
+export const apiResetTwoEmailFaPath = '/auth/reset-two-fa/email'
 export const getApiTwoFaPath = (id: string) => `/auth/${id}/two-fa`
 
 // user
