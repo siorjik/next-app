@@ -47,7 +47,7 @@ const Login = () => {
           setAlert({ ...alert, isShow: true, text: 'Your two factor verification was disabled' })
         } else setAlert({ isShow: true, text: 'Two factor verification reset error, link was expired', isErr: true })
 
-        setTimeout(() => setAlert({ ...alert, isShow: false, text: '' }), 5000)
+        setTimeout(() => setAlert({ isErr: false, isShow: false, text: '' }), 5000)
       }
     })()
   }, [])
@@ -103,7 +103,7 @@ const Login = () => {
     <>
       {
         alert.isShow &&
-        <Row className='mt-20 p-10'>
+        <Row className='mt-20 p-10 position-absolute w-100-percent'>
           <Col xs={24} md={16} className='m-auto'>
             <Alert message={alert.text} type={alert.isErr ? 'error' : 'warning'} showIcon />
           </Col>
