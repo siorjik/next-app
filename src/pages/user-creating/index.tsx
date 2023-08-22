@@ -14,10 +14,13 @@ const { Item } = Form
 const UserCreating = () => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
   const [isShowAlert, setShowAlert] = useState(false)
+  const [isLoading, setLoading] = useState(false)
 
   const [form] = Form.useForm()
 
   const onSubmit = async (values: { [k: string]: string | number }) => {
+    setLoading(true)
+
     const result = await apiService({
       url: apiUserCreatePath,
       data: { ...values, isActive: false },
@@ -31,6 +34,8 @@ const UserCreating = () => {
 
       form.resetFields()
     }
+
+    setLoading(false)
   }
 
   return (
@@ -54,7 +59,7 @@ const UserCreating = () => {
         >
           <Input type='email' />
         </Item>
-        <Item><Button type='primary' htmlType='submit'>Create</Button></Item>
+        <Item><Button type='primary' htmlType='submit' loading={isLoading}>Create</Button></Item>
       </Form>
 
       <Error error={err} respWidth={{ xs: 24 }} />

@@ -38,6 +38,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
         return { ...user, ...token }
       },
+
       session: async ({ session, token }) => {
         session.user = token
 

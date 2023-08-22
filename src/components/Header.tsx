@@ -27,7 +27,7 @@ const HeaderComp = ({ updateAuth }: { updateAuth?: (tokens: TokensType) => {} })
   const logOut = async () => {
     const session = await getSession()
 
-    await apiService({
+    const result: { isLogOuted: boolean } = await apiService({
       url: `${apiLogoutPath}?refresh=${session?.user.refreshToken}`,
       method: 'get',
       isServer: false,
@@ -35,7 +35,7 @@ const HeaderComp = ({ updateAuth }: { updateAuth?: (tokens: TokensType) => {} })
       isLogOut: true
     })
 
-    signOut()
+    if (result.isLogOuted) signOut()
   }
 
   return (

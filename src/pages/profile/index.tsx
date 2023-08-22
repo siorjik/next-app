@@ -20,8 +20,9 @@ import {
 import { TokensType } from '@/types/tokenType'
 import { ProfileUserType, UserType } from '@/types/userType'
 import withAuth from '@/hoc/withAuth'
+import { GetServerSideProps } from 'next'
 
-const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => {
+const Profile = ({ updateAuth, userData }: { updateAuth: (tokens: TokensType) => {}, userData: UserType }) => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
   const [user, setUser] = useState<ProfileUserType>({ firstName: '', lastName: '', email: '', id: '', isTwoFa: false })
   const [modal, setModal] = useState<{ isShow: boolean, text:string }>({ isShow: false, text: '' })
@@ -29,14 +30,7 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
   const [form] = Form.useForm()
 
   useEffect(() => {
-    (async () => {
-      const session = await getSession()
-
-      const user: UserType =
-        await apiService({ url: getApiUserPath(session?.user.id), method: 'get', isServer: false, updateAuth })
-      
-      setStateUser(user)
-    })()
+    if (userData) setStateUser(userData)
   }, [])
 
   useEffect(() => {
@@ -164,6 +158,12 @@ const Profile = ({ updateAuth }: { updateAuth: (tokens: TokensType) => {} }) => 
       {modal.isShow && <Alert message={modal.text} type="success" showIcon />}
     </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getSession(ctx)
+
+  return await apiService({ url: getApiUserPath(session?.user.id), method: 'get', ctx, name: 'userData' })
 }
 
 export default withAuth(Profile)

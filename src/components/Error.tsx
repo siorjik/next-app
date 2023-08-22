@@ -19,7 +19,7 @@ const Error = (
     else setShow(false)
   }, [errMess])
 
-  if (statusCode && statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true')
+  if (statusCode && statusCode === 401 && pathname !== loginAppPath) replace('/error?signOut=true&isClient=true')
 
   const widthObj = respWidth || { xs: 24, md: 16, lg: 12 }
 

@@ -15,6 +15,7 @@ const { Item } = Form
 
 const PasswordCreating = () => {
   const [err, setErr] = useState<ApiErrorType>({ message: '', statusCode: 0, error: '' })
+  const [isLoading, setLoading] = useState(false)
 
   const [messageApi, contextHolder] = message.useMessage()
   const [form] = Form.useForm()
@@ -29,6 +30,8 @@ const PasswordCreating = () => {
 
       return false
     }
+
+    setLoading(true)
 
     const result = await apiService({
       url: apiUserCreatePasswordPath,
@@ -49,6 +52,8 @@ const PasswordCreating = () => {
 
       setTimeout(() => push(loginAppPath), 3000)
     }
+
+    setLoading(false)
   }
 
   return (
@@ -70,7 +75,7 @@ const PasswordCreating = () => {
         >
           <Input.Password />
         </Item>
-        <Item><Button type='primary' htmlType='submit'>Create Password</Button></Item>
+        <Item><Button type='primary' htmlType='submit' loading={isLoading}>Create Password</Button></Item>
       </Form>
 
       <Error error={err} respWidth={{ xs: 24 }} />
