@@ -43,7 +43,7 @@ const User = ({ users, updateAuth }: { users: UserType[], updateAuth: (tokens: T
   const remove = async (id: number) => {
     const result = await apiService({ url: getApiUserDeletePath(id), method: 'delete', isServer: false, updateAuth })
 
-    if (result.error) router.replace('/error?signOut=true')
+    if (result.error) router.replace('/error?signOut=true&isClient=true')
     else setUserList(userList.filter(user => user.id !== id))
   }
 

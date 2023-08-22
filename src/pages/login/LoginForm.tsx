@@ -1,15 +1,27 @@
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { Button, Form, Input } from 'antd'
 
 import setFormNumberValue from '@/helpers/setFormNumberValue'
 
+type LoginPropsType = {
+  onSubmit: (values: { email: string, password: string, code?: string }) => Promise<void> | void,
+  isTwoFaStep: boolean,
+  setTwoFaStep: () => void
+}
+
 const { Item } = Form
 
-const LoginForm = (
-  { onSubmit, isTwoFaStep }:
-  { onSubmit: (values: { email: string, password: string, code?: string }) => Promise<void> | void, isTwoFaStep: boolean }
-) => {
+const LoginForm = ({ onSubmit, isTwoFaStep, setTwoFaStep }: LoginPropsType) => {
   const [form] = Form.useForm()
+
+  useEffect(() => {
+    if (!isTwoFaStep && form.getFieldValue('code')) form.setFieldValue('code', '')
+  }, [isTwoFaStep])
+
+  const onValuesChange = ({ code, email }: { code: string, email: string }) => {
+    if (code) setFormNumberValue(code, form, 'code')
+    else if (email && isTwoFaStep) setTwoFaStep()
+  }
 
   return (
     <>
@@ -18,7 +30,7 @@ const LoginForm = (
         form={form}
         layout='vertical'
         onFinish={() => onSubmit(form.getFieldsValue())}
-        onValuesChange={({ code }: { code: string }) => code && setFormNumberValue(code, form, 'code')}
+        onValuesChange={onValuesChange}
       >
         <Item
           name='email'

@@ -7,6 +7,7 @@ import { GetServerSideProps } from 'next'
 
 import Error from '@/components/Error'
 import RecoveryModal from './RecoveryModal'
+import Spinner from '@/components/Spinner'
 
 import {
   apiCheckTwoFaPath,
@@ -26,6 +27,7 @@ const Login = () => {
   const [isTwoFaStep, setTwoFaStep] = useState(false)
   const [alert, setAlert] = useState<{ isShow: boolean, text: string, isErr: boolean }>({ isShow: false, text: '', isErr: false })
   const [modal, setModal] = useState<ModalStateType>({ isShow: false, isTwoFa: false, title: '', text: '' })
+  const [isLoading, setLoading] = useState(false)
 
   const router = useRouter()
   const { data } = useSession()
@@ -56,17 +58,21 @@ const Login = () => {
     if (data?.user.id) router.push('/')
   }, [data, router])
 
-  const checkTwoFa = async (email: string) => (
-    await apiService({
+  const checkTwoFa = async (email: string) => {
+    setErr({ message: '', statusCode: 0, error: '' })
+
+    return await apiService({
       url: apiCheckTwoFaPath,
       method: 'post',
       data: { email },
       withoutAuthFlow: true,
       isServer: false
     })
-  )
+  }
 
   const onSubmit = useCallback(async (values: { email: string, password: string, code?: string }) => {
+    setLoading(true)
+
     if (isTwoFaStep) {
       const login = await signIn('credentials', { redirect: false, ...values })
 
@@ -81,6 +87,8 @@ const Login = () => {
         if (login?.error) setErr({ message: login.error })
       } else setTwoFaStep(true)
     }
+
+    setLoading(false)
   }, [isTwoFaStep])
 
   const recoveryPassword = async (email: string) => {
@@ -101,6 +109,7 @@ const Login = () => {
 
   return (
     <>
+      <Spinner isLoading={isLoading} styleName='spinner-small position-absolute pt-30' />
       {
         alert.isShow &&
         <Row className='mt-20 p-10 position-absolute w-100-percent'>
@@ -111,7 +120,7 @@ const Login = () => {
       }
 
       <div className='primary-form'>
-        <LoginForm onSubmit={onSubmit} isTwoFaStep={isTwoFaStep} />  
+        <LoginForm onSubmit={onSubmit} isTwoFaStep={isTwoFaStep} setTwoFaStep={() => setTwoFaStep(false)} />  
         <Error error={err} respWidth={{ xs: 24 }} />
 
         <Link className='pt-10' href={userCreatingAppPath}>or create a new account</Link>

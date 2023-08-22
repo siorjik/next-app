@@ -10,7 +10,7 @@ function withAuth<P>(WrappedComponent: React.ComponentType<P>) {
     }, [tokens])
 
     const updateAuth = async (tokens: TokensType) =>
-      await fetch(`/api/auth/session?update&access=${tokens.accessToken}&refresh=${tokens.refreshToken}`)
+      await fetch(`/api/auth/session?update=true&access=${tokens.accessToken}&refresh=${tokens.refreshToken}`)
 
     return <WrappedComponent {...props} updateAuth={updateAuth} />
   }

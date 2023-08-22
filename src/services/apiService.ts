@@ -86,12 +86,12 @@ export default async (params: ParamsType) => {
         if (isServer) {
           return {
             redirect: {
-              destination: error.response.status === 401 ? '/error?signOut=true' : '/error',
+              destination: error.response.status === 401 ? '/error?signOut=true&isServer=true' : '/error',
               permanent: false,
             }
           }
         } else {
-          if (error.response.status === 401) return Router.push('/error?signOut=true')
+          if (error.response.status === 401) return Router.push('/error?signOut=true&isClient=true')
           else return error.response.data
         }
       }

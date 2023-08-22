@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button, Col, Form, FormInstance, Input, Row } from 'antd'
 
 const { Item } = Form
@@ -7,10 +8,20 @@ const PasswordForm = ({
 }: { 
   form: FormInstance, updatePassword: (values: { [k: string]: string; }) => Promise<false | undefined>
 }) => {
+  const [isLoading, setLoading] = useState(false)
+
+  const onFinish = async (values: { currentPass: string, newPass: string, confirmPass: string }) => {
+    setLoading(true)
+
+    await updatePassword({ ...values })
+
+    setLoading(false)
+  }
+
   return (
     <Row>
       <Col xs={24} md={16} lg={12}>
-        <Form form={form} layout='vertical' onFinish={updatePassword}>
+        <Form form={form} layout='vertical' onFinish={onFinish}>
           <Item
             name='currentPass'
             label='Enter your current password'
@@ -32,7 +43,7 @@ const PasswordForm = ({
           >
             <Input.Password />
           </Item>
-          <Item><Button type='primary' htmlType='submit'>Change Password</Button></Item>
+          <Item><Button type='primary' htmlType='submit' loading={isLoading}>Change Password</Button></Item>
         </Form>
       </Col>
     </Row>
